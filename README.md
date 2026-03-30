@@ -1,0 +1,79 @@
+# stream-overlay-v3
+
+> **Work in progress**
+
+The stream overlay supports multiple modes. Modes are selectable and can
+be toggled on or off. Each mode lives in its own file and can be
+excluded from compilation if not needed. Modes respond to TCP commands.
+
+## Mode: Pomodoro
+
+Sets a 25 minute timer for tasks and insists on a 5 minute break. This
+should be visible at all times and should alert when the timer runs out.
+It should have the tomato emoji displayed.
+
+## Mode: Physics Test
+
+A physics-based stream overlay that renders bouncing balls on a
+1920x1080 transparent window. Balls are spawned via TCP commands from
+StreamerBot, letting viewers trigger interactions during a stream.
+
+## Mode: Pop Ups
+
+Intended to drive engagement. A popup that will display when a new user
+enters the stream. Will display a message greeting them.
+
+## Graphical Elements
+
+Alerts share a consistent look across modes (Pomodoro and Pop Ups),
+styled to match the Tokyo Night theme. Alerts hover at the bottom of the
+screen for a set duration then fade out. They are triggered by commands
+that include an alert title and body text, displayed title-above-text.
+
+## Tech
+
+- C++17
+- SDL2 --- rendering
+- Box2D 2.4.1 --- physics simulation
+- CMake 3.20+
+- Winsock2 --- TCP networking
+
+## How it works
+
+The overlay listens on TCP port `7777` for newline-terminated commands
+sent by StreamerBot. Each mode registers its own commands. StreamerBot
+integration scripts are in `/scripts/`.
+
+## Commands
+
+Commands are sent as newline-terminated strings to TCP port `7777`.
+
+### Mode: Physics Test
+
+#### `spawn_ball [cx cy vx vy r g b]`
+
+Spawns a ball in the physics simulation. All parameters are optional ---
+omitted values are randomized.
+
+  Parameter   Type    Description
+  ----------- ------- --------------------------------
+  `cx`        float   Center X position (pixels)
+  `cy`        float   Center Y position (pixels)
+  `vx`        float   Velocity X (pixels/frame)
+  `vy`        float   Velocity Y (pixels/frame)
+  `r`         uint8   Red color component (0--255)
+  `g`         uint8   Green color component (0--255)
+  `b`         uint8   Blue color component (0--255)
+
+Examples:
+
+    spawn_ball
+    spawn_ball 960 540
+    spawn_ball 960 540 1.5 -2.0 255 0 0
+
+## Build
+
+``` bash
+cmake -B build
+cmake --build build
+```
