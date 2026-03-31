@@ -30,6 +30,7 @@ void PhysicsMode::render(SDL_Renderer* renderer)
         int cx = (int)(pos.x * PPM);
         int cy = (int)(pos.y * PPM);
         SDL_SetRenderDrawColor(renderer, ball.color.r, ball.color.g, ball.color.b, 255);
+        //SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
         fillCircle(renderer, cx, cy, BALL_PX / 2);
     }
 }

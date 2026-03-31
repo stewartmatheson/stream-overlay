@@ -71,26 +71,64 @@ Examples:
     spawn_ball 960 540
     spawn_ball 960 540 1.5 -2.0 255 0 0
 
+### Mode: Pop Ups
+
+#### `popup Title|Body[|BorderColor][|BgColor]`
+
+Displays a greeting popup. Fields are pipe-delimited. Colors are
+optional and default to the Tokyo Night theme.
+
+  Parameter       Type     Description
+  --------------- -------- ---------------------------
+  `Title`         string   Popup heading text
+  `Body`          string   Popup body text
+  `BorderColor`   string   Optional border color
+  `BgColor`       string   Optional background color
+
+**Helper script** --- `scripts/send-popup.ps1` (PowerShell):
+
+``` powershell
+# Defaults — sends "Hello / This is a test popup message"
+.\scripts\send-popup.ps1
+
+# Custom title and body
+.\scripts\send-popup.ps1 -Title "Welcome!" -Body "Enjoy the stream"
+
+# With optional colors
+.\scripts\send-popup.ps1 -Title "Hey" -Body "Nice to see you" -BorderColor "#ff0000" -BgColor "#1a1b26"
+
+# Custom port
+.\scripts\send-popup.ps1 -Title "Hi" -Body "Test" -Port 9999
+```
+
 ## Build
 
 Two build configurations are maintained under `build/`:
 
-| Config | Purpose |
-|--------|---------|
-| `build/ninja` | Fast builds, generates `compile_commands.json` for tooling |
-| `build/vs` | Visual Studio solution for debugging |
+  ---------------------------------------------------------------------
+  Config                           Purpose
+  -------------------------------- ------------------------------------
+  `build/ninja`                    Fast builds, generates
+                                   `compile_commands.json` for tooling
+
+  `build/vs`                       Visual Studio solution for debugging
+  ---------------------------------------------------------------------
 
 ### Ninja (compile_commands.json)
 
-```bash
+``` bash
 cmake -B build/ninja -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 cmake --build build/ninja
 ```
 
 ### Visual Studio
 
-```bash
+``` bash
 cmake -B build/vs -G "Visual Studio 17 2022" -A x64
 ```
 
 Then open `build/vs/stream-overlay.sln` in Visual Studio.
+
+## TODO
+
+Make sure we static link in libs that don't change like box2d and SDL
