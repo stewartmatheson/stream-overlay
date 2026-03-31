@@ -32,7 +32,7 @@ that include an alert title and body text, displayed title-above-text.
 
 ## Tech
 
-- C++17
+- C++23
 - SDL2 --- rendering
 - Box2D 2.4.1 --- physics simulation
 - CMake 3.20+
@@ -73,7 +73,24 @@ Examples:
 
 ## Build
 
-``` bash
-cmake -B build
-cmake --build build
+Two build configurations are maintained under `build/`:
+
+| Config | Purpose |
+|--------|---------|
+| `build/ninja` | Fast builds, generates `compile_commands.json` for tooling |
+| `build/vs` | Visual Studio solution for debugging |
+
+### Ninja (compile_commands.json)
+
+```bash
+cmake -B build/ninja -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+cmake --build build/ninja
 ```
+
+### Visual Studio
+
+```bash
+cmake -B build/vs -G "Visual Studio 17 2022" -A x64
+```
+
+Then open `build/vs/stream-overlay.sln` in Visual Studio.
