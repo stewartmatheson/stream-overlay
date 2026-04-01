@@ -1,101 +1,119 @@
-#include "PopUpsMode.h"
-#include <print>
+#include "BottomPopupMode.h"
+#include <cstdio>
 #include <algorithm>
+#include <sstream>
 
-PopUpsMode::PopUpsMode(int winW, int winH)
+BottomPopupMode::BottomPopupMode(int winW, int winH)
     : winW_(winW), winH_(winH)
 {
     if (TTF_Init() == -1) {
-        std::println(stderr, "TTF_Init failed: {}", TTF_GetError());
+        fprintf(stderr, "TTF_Init failed: %s\n", TTF_GetError());
         return;
     }
 
     const char* fontPath = "C:/Windows/Fonts/seguiemj.ttf";
-    titleFont_ = TTF_OpenFont(fontPath, 22);
-    bodyFont_  = TTF_OpenFont(fontPath, 16);
+    titleFont_ = TTF_OpenFont(fontPath, 24);
+    bodyFont_  = TTF_OpenFont(fontPath, 20);
 
     if (!titleFont_ || !bodyFont_) {
-        std::println(stderr, "Failed to load font: {}", TTF_GetError());
+        fprintf(stderr, "Failed to load font: %s\n", TTF_GetError());
     }
 }
 
-PopUpsMode::~PopUpsMode()
+BottomPopupMode::~BottomPopupMode()
 {
     if (titleFont_) TTF_CloseFont(titleFont_);
     if (bodyFont_)  TTF_CloseFont(bodyFont_);
-    TTF_Quit();
 }
 
-void PopUpsMode::update(float dt)
+void BottomPopupMode::update(float dt)
 {
-    for (auto& p : popups_)
-        p.timeLeft -= dt;
+    for (auto& ap : popups_) {
+        ap.phaseTime += dt;
 
-    while (!popups_.empty() && popups_.front().timeLeft <= 0.0f)
+        switch (ap.phase) {
+        case Phase::SlideIn:
+            if (ap.phaseTime >= SLIDE_TIME) {
+                ap.phase     = Phase::Display;
+                ap.phaseTime = 0.0f;
+            }
+            break;
+        case Phase::Display:
+            if (ap.phaseTime >= ap.data.totalTime) {
+                ap.phase     = Phase::SlideOut;
+                ap.phaseTime = 0.0f;
+            }
+            break;
+        case Phase::SlideOut:
+            break;
+        }
+    }
+
+    while (!popups_.empty() &&
+           popups_.front().phase == Phase::SlideOut &&
+           popups_.front().phaseTime >= SLIDE_TIME) {
         popups_.pop_front();
+    }
 }
 
-void PopUpsMode::render(SDL_Renderer* renderer)
+static float easeOutCubic(float t) {
+    float f = 1.0f - t;
+    return 1.0f - f * f * f;
+}
+
+static float easeInCubic(float t) {
+    return t * t * t;
+}
+
+void BottomPopupMode::render(SDL_Renderer* renderer)
 {
     if (!titleFont_ || !bodyFont_) return;
 
-    int yOffset = MARGIN;
+    for (auto& ap : popups_) {
+        auto& popup = ap.data;
 
-    for (auto& popup : popups_) {
-        // Calculate alpha for fade out
-        float alpha = 1.0f;
-        if (popup.timeLeft < FADE_TIME)
-            alpha = std::max(0.0f, popup.timeLeft / FADE_TIME);
-        // Lerp colors toward the chroma key (magenta) for fade-out.
-        // Color-key transparency is binary, so alpha blending would
-        // reveal the magenta background. Instead we move toward it.
-        auto lerp = [](Uint8 from, Uint8 to, float t) -> Uint8 {
-            return (Uint8)((int)from + (int)((int)to - (int)from) * t);
-        };
-        float fade = 1.0f - alpha; // 0 = fully visible, 1 = fully magenta
-        SDL_Color keyColor = { 255, 0, 255, 255 };
-
-        SDL_Color fadedBg = {
-            lerp(popup.bgColor.r, keyColor.r, fade),
-            lerp(popup.bgColor.g, keyColor.g, fade),
-            lerp(popup.bgColor.b, keyColor.b, fade), 255
-        };
-        SDL_Color fadedBorder = {
-            lerp(popup.borderColor.r, keyColor.r, fade),
-            lerp(popup.borderColor.g, keyColor.g, fade),
-            lerp(popup.borderColor.b, keyColor.b, fade), 255
-        };
-        SDL_Color fadedText = {
-            lerp(255, keyColor.r, fade),
-            lerp(255, keyColor.g, fade),
-            lerp(255, keyColor.b, fade), 255
-        };
-
-        // Render title and body text to textures
         int textAreaWidth = BOX_WIDTH - BORDER_WIDTH - PADDING * 2;
 
         int titleW = 0, titleH = 0;
         SDL_Texture* titleTex = renderText(renderer, titleFont_,
-            popup.title, fadedText, textAreaWidth, &titleW, &titleH);
+            popup.title, { 255, 255, 255, 255 }, textAreaWidth, &titleW, &titleH);
 
         int bodyW = 0, bodyH = 0;
         SDL_Texture* bodyTex = renderText(renderer, bodyFont_,
-            popup.body, fadedText, textAreaWidth, &bodyW, &bodyH);
+            popup.body, { 255, 255, 255, 255 }, textAreaWidth, &bodyW, &bodyH);
 
         int boxHeight = PADDING + titleH + 8 + bodyH + PADDING;
-        int boxX = winW_ - BOX_WIDTH - MARGIN;
-        int boxY = yOffset;
+        int boxX = (winW_ - BOX_WIDTH) / 2;
+
+        // Calculate Y position based on phase
+        int fullyVisibleY = winH_ - boxHeight;
+        int offScreenY    = winH_;
+
+        float slideProgress = 0.0f;
+        switch (ap.phase) {
+        case Phase::SlideIn:
+            slideProgress = easeOutCubic(std::min(1.0f, ap.phaseTime / SLIDE_TIME));
+            break;
+        case Phase::Display:
+            slideProgress = 1.0f;
+            break;
+        case Phase::SlideOut:
+            slideProgress = 1.0f - easeInCubic(std::min(1.0f, ap.phaseTime / SLIDE_TIME));
+            break;
+        }
+
+        int boxY = offScreenY + (int)((float)(fullyVisibleY - offScreenY) * slideProgress);
 
         // Draw background
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
         SDL_SetRenderDrawColor(renderer,
-            fadedBg.r, fadedBg.g, fadedBg.b, 255);
+            popup.bgColor.r, popup.bgColor.g, popup.bgColor.b, 255);
         SDL_Rect bgRect = { boxX, boxY, BOX_WIDTH, boxHeight };
         SDL_RenderFillRect(renderer, &bgRect);
 
         // Draw left border
         SDL_SetRenderDrawColor(renderer,
-            fadedBorder.r, fadedBorder.g, fadedBorder.b, 255);
+            popup.borderColor.r, popup.borderColor.g, popup.borderColor.b, 255);
         SDL_Rect borderRect = { boxX, boxY, BORDER_WIDTH, boxHeight };
         SDL_RenderFillRect(renderer, &borderRect);
 
@@ -120,17 +138,13 @@ void PopUpsMode::render(SDL_Renderer* renderer)
             SDL_RenderCopy(renderer, bodyTex, nullptr, &bodyRect);
             SDL_DestroyTexture(bodyTex);
         }
-
-        yOffset += boxHeight + 8;
     }
 }
 
-bool PopUpsMode::handleCommand(const std::vector<std::string>& tokens)
+bool BottomPopupMode::handleCommand(const std::vector<std::string>& tokens)
 {
-    if (tokens[0] != "popup") return false;
+    if (tokens[0] != "bottompopup") return false;
 
-    // Rejoin everything after "popup" and split on '|'
-    // Format: popup <title>|<body>|<border_r,g,b>|<bg_r,g,b>
     std::string joined;
     for (size_t i = 1; i < tokens.size(); i++) {
         if (i > 1) joined += ' ';
@@ -148,11 +162,11 @@ bool PopUpsMode::handleCommand(const std::vector<std::string>& tokens)
     parts.push_back(joined.substr(start));
 
     if (parts.empty() || parts[0].empty()) {
-        std::println(stderr, "popup: missing title");
+        fprintf(stderr, "bottompopup: missing title\n");
         return true;
     }
 
-    PopUp p;
+    BottomPopUp p;
     p.title     = parts[0];
     p.body      = (parts.size() > 1) ? parts[1] : "";
     p.totalTime = DISPLAY_TIME;
@@ -160,30 +174,34 @@ bool PopUpsMode::handleCommand(const std::vector<std::string>& tokens)
 
     // Default colors
     p.borderColor = { 100, 180, 255, 255 };
-    p.bgColor     = { 30, 30, 30, 220 };
+    p.bgColor     = { 30, 30, 30, 255 };
 
     // Parse optional border color: r,g,b
     if (parts.size() > 2 && !parts[2].empty()) {
         int r, g, b;
-        if (sscanf(parts[2].c_str(), "%d,%d,%d", &r, &g, &b) == 3)
+        char comma1, comma2;
+        std::istringstream iss(parts[2]);
+        if (iss >> r >> comma1 >> g >> comma2 >> b && comma1 == ',' && comma2 == ',')
             p.borderColor = { (Uint8)r, (Uint8)g, (Uint8)b, 255 };
     }
 
     // Parse optional background color: r,g,b
     if (parts.size() > 3 && !parts[3].empty()) {
         int r, g, b;
-        if (sscanf(parts[3].c_str(), "%d,%d,%d", &r, &g, &b) == 3)
-            p.bgColor = { (Uint8)r, (Uint8)g, (Uint8)b, 220 };
+        char comma1, comma2;
+        std::istringstream iss(parts[3]);
+        if (iss >> r >> comma1 >> g >> comma2 >> b && comma1 == ',' && comma2 == ',')
+            p.bgColor = { (Uint8)r, (Uint8)g, (Uint8)b, 255 };
     }
 
-    std::println("Popup: [{}] {}", p.title, p.body);
-    popups_.push_back(p);
+    printf("BottomPopup: [%s] %s\n", p.title.c_str(), p.body.c_str());
+    popups_.push_back({ p, Phase::SlideIn, 0.0f });
     return true;
 }
 
-SDL_Texture* PopUpsMode::renderText(SDL_Renderer* renderer, TTF_Font* font,
-                                     const std::string& text, SDL_Color color,
-                                     int wrapWidth, int* outW, int* outH)
+SDL_Texture* BottomPopupMode::renderText(SDL_Renderer* renderer, TTF_Font* font,
+                                          const std::string& text, SDL_Color color,
+                                          int wrapWidth, int* outW, int* outH)
 {
     if (text.empty()) {
         *outW = 0;

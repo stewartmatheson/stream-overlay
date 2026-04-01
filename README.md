@@ -23,6 +23,14 @@ StreamerBot, letting viewers trigger interactions during a stream.
 Intended to drive engagement. A popup that will display when a new user
 enters the stream. Will display a message greeting them.
 
+## Mode: BottomPopup
+
+Same as the standard popup with all the same styling and Graphical
+treatment however this mode instead of floating over the top right
+corner will slide in from the bottom of the screen, display for a
+configurable amount of time and then slide back out. With this mode we
+should avoid having to mess around with transparent pixels.
+
 ## Graphical Elements
 
 Alerts share a consistent look across modes (Pomodoro and Pop Ups),
@@ -99,6 +107,36 @@ optional and default to the Tokyo Night theme.
 
 # Custom port
 .\scripts\send-popup.ps1 -Title "Hi" -Body "Test" -Port 9999
+```
+
+### Mode: BottomPopup
+
+#### `bottompopup Title|Body[|BorderColor][|BgColor]`
+
+Displays a popup that slides in from the bottom of the screen. Fields are
+pipe-delimited. Colors are optional and default to the Tokyo Night theme.
+
+  Parameter       Type     Description
+  --------------- -------- ---------------------------
+  `Title`         string   Popup heading text
+  `Body`          string   Popup body text
+  `BorderColor`   string   Optional border color
+  `BgColor`       string   Optional background color
+
+**Helper script** --- `scripts/send-bottompopup.ps1` (PowerShell):
+
+``` powershell
+# Defaults — sends "Hello / This is a test bottom popup message"
+.\scripts\send-bottompopup.ps1
+
+# Custom title and body
+.\scripts\send-bottompopup.ps1 -Title "Welcome!" -Body "Enjoy the stream"
+
+# With optional colors
+.\scripts\send-bottompopup.ps1 -Title "Hey" -Body "Nice to see you" -BorderColor "255,0,0" -BgColor "26,27,38"
+
+# Custom port
+.\scripts\send-bottompopup.ps1 -Title "Hi" -Body "Test" -Port 9999
 ```
 
 ## Build

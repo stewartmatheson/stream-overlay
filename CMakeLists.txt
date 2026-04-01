@@ -36,6 +36,7 @@ add_executable(stream-overlay
     src/main.cpp
     src/PhysicsMode.cpp
     src/PopUpsMode.cpp
+    src/BottomPopupMode.cpp
 )
 
 target_link_libraries(stream-overlay PRIVATE SDL2::SDL2 SDL2::SDL2main box2d SDL2_ttf::SDL2_ttf)

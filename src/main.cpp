@@ -13,6 +13,7 @@
 #include "PhysicsMode.h"
 // #include "PomodoroMode.h"
 #include "PopUpsMode.h"
+#include "BottomPopupMode.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -83,6 +84,7 @@ int main(int argc, char* argv[])
     modes.push_back(std::make_unique<PhysicsMode>(WIN_W, WIN_H));
     // modes.push_back(std::make_unique<PomodoroMode>());
     modes.push_back(std::make_unique<PopUpsMode>(WIN_W, WIN_H));
+    modes.push_back(std::make_unique<BottomPopupMode>(WIN_W, WIN_H));
 
     // --- TCP command server (non-blocking) ---
     WSADATA wsa;
