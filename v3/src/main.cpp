@@ -164,6 +164,18 @@ int main(int argc, char* argv[])
         }
         std::erase(clients, INVALID_SOCKET);
 
+        // Check if all modes are idle
+        bool allIdle = true;
+        for (auto& mode : modes) {
+            if (!mode->isIdle()) { allIdle = false; break; }
+        }
+
+        if (allIdle) {
+            SDL_Delay(50);
+            prev = SDL_GetPerformanceCounter();
+            continue;
+        }
+
         // Update and render
         SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
         SDL_RenderClear(renderer);

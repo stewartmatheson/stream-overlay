@@ -22,6 +22,7 @@ public:
     void update(float dt) override;
     void render(SDL_Renderer* renderer) override;
     bool handleCommand(const std::vector<std::string>& tokens) override;
+    bool isIdle() const override { return !hasActive_ && queue_.empty(); }
 
 private:
     enum class Phase { SlideIn, Display, SlideOut };

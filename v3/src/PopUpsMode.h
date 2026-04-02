@@ -22,6 +22,7 @@ public:
     void update(float dt) override;
     void render(SDL_Renderer* renderer) override;
     bool handleCommand(const std::vector<std::string>& tokens) override;
+    bool isIdle() const override { return popups_.empty(); }
 
 private:
     static constexpr float DISPLAY_TIME  = 5.0f;

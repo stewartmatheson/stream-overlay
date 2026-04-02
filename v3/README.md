@@ -172,7 +172,32 @@ Then open `build/vs/stream-overlay.sln` in Visual Studio.
 
 - Make sure we static link in libs that don't change like box2d and SDL
 
-- Handle more than one alert at a time. Perhaps we want for the last one
-  to finish before the next one is displayed. Lets have a queue where
-  only one alert gets displayed and then others wait for that alert to
-  disappear. We should support a configurable time between alerts
+## Claude answer to the performance issue with SDL and the colour key hack
+
+I asked claude to move forward with v4 using direct2D which is lower
+level and more powerful. The following was its response.
+
+    You'd typically pair DirectComposition with Direct2D and DirectWrite.
+
+    - Direct2D --- 2D drawing (rectangles, rounded rects, fills, borders,
+      gradients, images). Replaces what SDL_Renderer does now.
+    - DirectWrite --- text rendering (title/body text with font control,
+      word wrapping). Replaces SDL_ttf.
+
+    The pipeline would be:
+
+    1.  Create a DCompositionDevice and bind it to your window
+    2.  Create a swap chain with DXGI_ALPHA_MODE_PREMULTIPLIED (native
+        per-pixel alpha)
+    3.  Create a DCompositionVisual backed by that swap chain
+    4.  Draw each frame with Direct2D onto the swap chain surface
+    5.  DWM composites it with proper alpha --- no color-key hack needed
+
+    Direct2D is hardware-accelerated and handles anti-aliased shapes and
+    text well. It's more verbose than SDL but gives you full control over
+    transparency. The popup drawing code (borders, backgrounds, text layout)
+    would be roughly the same logic, just different API calls.
+
+    It's a significant rewrite of the rendering side, but the TCP command
+    server and mode logic would stay the same. Want me to plan out what the
+    migration would look like?
