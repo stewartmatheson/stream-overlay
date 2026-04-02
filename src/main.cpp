@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 
     // --- Modes ---
     std::vector<std::unique_ptr<Mode>> modes;
-    modes.push_back(std::make_unique<PhysicsMode>(WIN_W, WIN_H));
+    // modes.push_back(std::make_unique<PhysicsMode>(WIN_W, WIN_H));
     // modes.push_back(std::make_unique<PomodoroMode>());
     modes.push_back(std::make_unique<PopUpsMode>(WIN_W, WIN_H));
     modes.push_back(std::make_unique<BottomPopupMode>(WIN_W, WIN_H));

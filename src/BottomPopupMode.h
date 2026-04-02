@@ -27,7 +27,7 @@ private:
     enum class Phase { SlideIn, Display, SlideOut };
 
     static constexpr float SLIDE_TIME   = 0.4f;
-    static constexpr float DISPLAY_TIME = 5.0f;
+    static constexpr float DISPLAY_TIME = 10.0f;
     static constexpr float GAP_TIME     = 0.5f;
     static constexpr int   PADDING      = 16;
     static constexpr int   BORDER_WIDTH = 6;

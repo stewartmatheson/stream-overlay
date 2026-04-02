@@ -3,25 +3,52 @@ param(
     [int]    $BallPort = 7777
 )
 
-function Send-SpawnBall {
+function Send-OverlayCommand([string]$cmd) {
     try {
         $tcp    = [System.Net.Sockets.TcpClient]::new("127.0.0.1", $BallPort)
         $stream = $tcp.GetStream()
-        $cx  = Get-Random -Minimum 0   -Maximum 1920
-        $cy  = Get-Random -Minimum 0   -Maximum 1080
-        $vx  = [float](Get-Random -Minimum -300 -Maximum 300) / 100.0
-        $vy  = [float](Get-Random -Minimum -300 -Maximum 300) / 100.0
-        $r   = Get-Random -Minimum 0   -Maximum 256
-        $g   = Get-Random -Minimum 0   -Maximum 256
-        $b   = Get-Random -Minimum 0   -Maximum 256
-        $cmd = "spawn_ball $cx $cy $vx $vy $r $g $b`n"
-        $bytes = [System.Text.Encoding]::ASCII.GetBytes($cmd)
+        $bytes  = [System.Text.Encoding]::ASCII.GetBytes("$cmd`n")
         $stream.Write($bytes, 0, $bytes.Length)
         $stream.Flush()
         $tcp.Close()
-        Write-Host "  -> Spawned ball: $($cmd.Trim())"
+        Write-Host "  -> Sent: $cmd"
     } catch {
         Write-Warning "Could not connect to overlay on port $BallPort - is it running?"
+    }
+}
+
+function Send-SpawnBall {
+    $cx  = Get-Random -Minimum 0   -Maximum 1920
+    $cy  = Get-Random -Minimum 0   -Maximum 1080
+    $vx  = [float](Get-Random -Minimum -300 -Maximum 300) / 100.0
+    $vy  = [float](Get-Random -Minimum -300 -Maximum 300) / 100.0
+    $r   = Get-Random -Minimum 0   -Maximum 256
+    $g   = Get-Random -Minimum 0   -Maximum 256
+    $b   = Get-Random -Minimum 0   -Maximum 256
+    Send-OverlayCommand "spawn_ball $cx $cy $vx $vy $r $g $b"
+}
+
+function Send-BottomPopup([string]$title, [string]$body) {
+    $safeTitle = $title -replace '\|', '-'
+    $safeBody  = $body  -replace '\|', '-'
+    Send-OverlayCommand "bottompopup $safeTitle|$safeBody"
+}
+
+function Get-AlertFromEvent($msg) {
+    $source = $msg.event.source
+    $type   = $msg.event.type
+    $data   = $msg.data
+
+    switch ("$source/$type") {
+        "Twitch/Sub"           { return @{ Title = "New Subscriber!";   Body = "$($data.displayName) subscribed!" } }
+        "Twitch/ReSub"         { return @{ Title = "Re-Sub!";           Body = "$($data.displayName) resubscribed for $($data.cumulativeMonths) months!" } }
+        "Twitch/GiftSub"       { return @{ Title = "Gift Sub!";         Body = "$($data.displayName) gifted a sub to $($data.recipientDisplayName)!" } }
+        "Twitch/GiftBomb"      { return @{ Title = "Gift Bomb!";        Body = "$($data.displayName) gifted $($data.gifts) subs!" } }
+        "Twitch/Follow"        { return @{ Title = "New Follower!";     Body = "$($data.displayName) followed!" } }
+        "Twitch/Cheer"         { return @{ Title = "Cheer!";            Body = "$($data.displayName) cheered $($data.bits) bits!" } }
+        "Twitch/Raid"          { return @{ Title = "Raid!";             Body = "$($data.displayName) raided with $($data.viewers) viewers!" } }
+        "Twitch/ChatMessage"   { return $null }
+        default                { return @{ Title = "$source $type";     Body = if ($data.displayName) { $data.displayName } else { "" } } }
     }
 }
 
@@ -43,6 +70,16 @@ function Receive-FullMessage($ws, $ct) {
 
     return $sb.ToString()
 }
+
+# Events to completely ignore (Source/Type format)
+$ignoredEvents = [System.Collections.Generic.HashSet[string]]::new(
+    [string[]]@(
+        "Inputs/InputMouseClick"
+    )
+)
+
+# Track users we've already greeted this session
+$seenUsers = [System.Collections.Generic.HashSet[string]]::new()
 
 # --- Connect ---
 $ws  = [System.Net.WebSockets.ClientWebSocket]::new()
@@ -78,8 +115,26 @@ try {
         if ($msg.event) {
             $source = $msg.event.source
             $type   = $msg.event.type
+            $eventKey = "$source/$type"
+
+            if ($ignoredEvents.Contains($eventKey)) { continue }
+
             Write-Host "[$source] $type"
             Send-SpawnBall
+
+            # Greet first-time chatters this session
+            if ("$source/$type" -eq "Twitch/ChatMessage") {
+                $user = $msg.data.message.displayName
+                if ($user -and $seenUsers.Add($user)) {
+                    Write-Host "  -> First message from $user, greeting!"
+                    Send-BottomPopup "Welcome!" "$user just joined the chat!"
+                }
+            }
+
+            $alert = Get-AlertFromEvent $msg
+            if ($alert) {
+                Send-BottomPopup $alert.Title $alert.Body
+            }
         }
     }
 
