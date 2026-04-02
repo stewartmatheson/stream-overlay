@@ -102,10 +102,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     wc.lpszClassName = L"StreamOverlay";
     RegisterClassEx(&wc);
 
+    DWORD ex_style = WS_EX_NOREDIRECTIONBITMAP;
+    DWORD style = WS_POPUP;
+#ifdef _DEBUG
+    ex_style |= WS_EX_APPWINDOW;
+    style |= WS_CAPTION | WS_SYSMENU;
+#else
+    ex_style |= WS_EX_TRANSPARENT | WS_EX_LAYERED;
+#endif
+
     HWND hwnd = CreateWindowEx(
-        WS_EX_NOREDIRECTIONBITMAP | WS_EX_APPWINDOW,
+        ex_style,
         wc.lpszClassName, L"Stream Overlay",
-        WS_POPUP | WS_CAPTION | WS_SYSMENU,
+        style,
         0, 0, 1920, 1080,
         nullptr, nullptr, hInstance, nullptr);
 
