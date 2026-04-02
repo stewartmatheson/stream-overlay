@@ -174,7 +174,8 @@ void Renderer::draw_rounded_rect(D2D1_RECT_F rect, D2D1_COLOR_F fill, D2D1_COLOR
 void Renderer::draw_text(std::wstring_view text, D2D1_RECT_F rect, D2D1_COLOR_F color, bool is_title) {
     brush_->SetColor(color);
     dc_->DrawText(text.data(), static_cast<UINT32>(text.size()),
-        is_title ? title_fmt_.Get() : body_fmt_.Get(), rect, brush_.Get());
+        is_title ? title_fmt_.Get() : body_fmt_.Get(), rect, brush_.Get(),
+        D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT);
 }
 
 void Renderer::draw_border(D2D1_RECT_F rect, D2D1_COLOR_F color, float width) {
