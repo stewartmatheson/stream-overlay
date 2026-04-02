@@ -43,12 +43,12 @@ bool Renderer::init(HWND hwnd) {
         __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(dwrite_.GetAddressOf()));
     if (FAILED(hr)) return false;
 
-    dwrite_->CreateTextFormat(L"Segoe UI", nullptr,
-        DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+    dwrite_->CreateTextFormat(L"JetBrainsMono Nerd Font", nullptr,
+        DWRITE_FONT_WEIGHT_EXTRA_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
         22.f, L"en-us", title_fmt_.GetAddressOf());
 
-    dwrite_->CreateTextFormat(L"Segoe UI", nullptr,
-        DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+    dwrite_->CreateTextFormat(L"JetBrainsMono Nerd Font", nullptr,
+        DWRITE_FONT_WEIGHT_EXTRA_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
         16.f, L"en-us", body_fmt_.GetAddressOf());
 
     if (title_fmt_) title_fmt_->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);

@@ -130,9 +130,8 @@ void BottomPopup::render(Renderer& r) {
 
     r.draw_rounded_rect(rect, current_.bg_color, current_.border_color, 0.f);
 
-    float pad = 14.f;
-    D2D1_RECT_F title_rect = {rect.left + pad, rect.top + pad, rect.right - pad, rect.top + pad + 28.f};
-    D2D1_RECT_F body_rect  = {rect.left + pad, rect.top + pad + 32.f, rect.right - pad, rect.bottom - pad};
+    D2D1_RECT_F title_rect = {rect.left + kPad, rect.top + kPad, rect.right - kPad, rect.top + kPad + kTitleHeight};
+    D2D1_RECT_F body_rect  = {rect.left + kPad, rect.top + kPad + kTitleHeight + kTitleBodyGap, rect.right - kPad, rect.bottom - kPad};
 
     r.draw_text(current_.title, title_rect, colors::title, true);
     r.draw_text(current_.body, body_rect, colors::fg, false);

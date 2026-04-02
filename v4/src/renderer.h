@@ -12,7 +12,7 @@ using Microsoft::WRL::ComPtr;
 
 namespace colors {
     // Tokyo Night palette
-    constexpr D2D1_COLOR_F bg       = {26.f/255, 27.f/255, 38.f/255, 0.92f};
+    constexpr D2D1_COLOR_F bg       = {26.f/255, 27.f/255, 38.f/255, 1.f};
     constexpr D2D1_COLOR_F fg       = {192.f/255, 202.f/255, 245.f/255, 1.f};
     constexpr D2D1_COLOR_F accent   = {122.f/255, 162.f/255, 247.f/255, 1.f};
     constexpr D2D1_COLOR_F title    = {187.f/255, 154.f/255, 247.f/255, 1.f};
