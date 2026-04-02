@@ -113,8 +113,9 @@ optional and default to the Tokyo Night theme.
 
 #### `bottompopup Title|Body[|BorderColor][|BgColor]`
 
-Displays a popup that slides in from the bottom of the screen. Fields are
-pipe-delimited. Colors are optional and default to the Tokyo Night theme.
+Displays a popup that slides in from the bottom of the screen. Fields
+are pipe-delimited. Colors are optional and default to the Tokyo Night
+theme.
 
   Parameter       Type     Description
   --------------- -------- ---------------------------
@@ -167,6 +168,11 @@ cmake -B build/vs -G "Visual Studio 17 2022" -A x64
 
 Then open `build/vs/stream-overlay.sln` in Visual Studio.
 
-## TODO
+## Bugs and Issues
 
-Make sure we static link in libs that don't change like box2d and SDL
+- Make sure we static link in libs that don't change like box2d and SDL
+
+- Handle more than one alert at a time. Perhaps we want for the last one
+  to finish before the next one is displayed. Lets have a queue where
+  only one alert gets displayed and then others wait for that alert to
+  disappear. We should support a configurable time between alerts

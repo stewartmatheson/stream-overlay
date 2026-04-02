@@ -28,31 +28,36 @@ BottomPopupMode::~BottomPopupMode()
 
 void BottomPopupMode::update(float dt)
 {
-    for (auto& ap : popups_) {
-        ap.phaseTime += dt;
+    if (hasActive_) {
+        active_.phaseTime += dt;
 
-        switch (ap.phase) {
+        switch (active_.phase) {
         case Phase::SlideIn:
-            if (ap.phaseTime >= SLIDE_TIME) {
-                ap.phase     = Phase::Display;
-                ap.phaseTime = 0.0f;
+            if (active_.phaseTime >= SLIDE_TIME) {
+                active_.phase     = Phase::Display;
+                active_.phaseTime = 0.0f;
             }
             break;
         case Phase::Display:
-            if (ap.phaseTime >= ap.data.totalTime) {
-                ap.phase     = Phase::SlideOut;
-                ap.phaseTime = 0.0f;
+            if (active_.phaseTime >= active_.data.totalTime) {
+                active_.phase     = Phase::SlideOut;
+                active_.phaseTime = 0.0f;
             }
             break;
         case Phase::SlideOut:
+            if (active_.phaseTime >= SLIDE_TIME) {
+                hasActive_ = false;
+                gapTimer_  = GAP_TIME;
+            }
             break;
         }
-    }
-
-    while (!popups_.empty() &&
-           popups_.front().phase == Phase::SlideOut &&
-           popups_.front().phaseTime >= SLIDE_TIME) {
-        popups_.pop_front();
+    } else if (!queue_.empty()) {
+        gapTimer_ -= dt;
+        if (gapTimer_ <= 0.0f) {
+            active_    = { queue_.front(), Phase::SlideIn, 0.0f };
+            hasActive_ = true;
+            queue_.pop_front();
+        }
     }
 }
 
@@ -69,7 +74,10 @@ void BottomPopupMode::render(SDL_Renderer* renderer)
 {
     if (!titleFont_ || !bodyFont_) return;
 
-    for (auto& ap : popups_) {
+    if (!hasActive_) return;
+
+    {
+        auto& ap = active_;
         auto& popup = ap.data;
 
         int textAreaWidth = BOX_WIDTH - BORDER_WIDTH - PADDING * 2;
@@ -195,7 +203,12 @@ bool BottomPopupMode::handleCommand(const std::vector<std::string>& tokens)
     }
 
     printf("BottomPopup: [%s] %s\n", p.title.c_str(), p.body.c_str());
-    popups_.push_back({ p, Phase::SlideIn, 0.0f });
+    if (!hasActive_) {
+        active_    = { p, Phase::SlideIn, 0.0f };
+        hasActive_ = true;
+    } else {
+        queue_.push_back(p);
+    }
     return true;
 }
 
