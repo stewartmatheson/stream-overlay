@@ -22,16 +22,12 @@ example:
 {
   "timeBlocks": [
     {
-      "startTime": "9:00 AM",
-      "endTime": "9:30 AM",
       "workDuration": 25,
       "restDuration": 5,
       "title": "Feature Development",
       "description": "Work on the new authentication flow"
     },
     {
-      "startTime": "9:30 AM",
-      "endTime": "10:00 AM",
       "workDuration": 25,
       "restDuration": 5,
       "title": "Code Review",

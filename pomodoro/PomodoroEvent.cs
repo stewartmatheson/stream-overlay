@@ -1,40 +1,86 @@
 namespace Pomodoro;
 
+using System;
+using System.Net.Sockets;
+using System.Text;
+
 public class PomodoroEventArgs : EventArgs
 {
-    public string Title { get; }
-    public string Description { get; }
-    public bool IsWorkPhase { get; }
+  public string Title { get; }
+  public string Description { get; }
+  public bool IsWorkPhase { get; }
 
-    public PomodoroEventArgs(string title, string description, bool isWorkPhase)
-    {
-        Title = title;
-        Description = description;
-        IsWorkPhase = isWorkPhase;
-    }
+  public PomodoroEventArgs(string title, string description, bool isWorkPhase)
+  {
+    Title = title;
+    Description = description;
+    IsWorkPhase = isWorkPhase;
+  }
 }
 
-public interface IPomodoroEvent
+public interface IPomodoroEventHandler
 {
-    void OnWorkStarted(object? sender, PomodoroEventArgs e);
-    void OnRestStarted(object? sender, PomodoroEventArgs e);
-    void OnBlockCompleted(object? sender, PomodoroEventArgs e);
+  void OnWorkStarted(object? sender, PomodoroEventArgs e);
+  void OnRestStarted(object? sender, PomodoroEventArgs e);
+  void OnBlockCompleted(object? sender, PomodoroEventArgs e);
 }
 
-public class ConsolePomodoroEvent : IPomodoroEvent
+public class ConsoleEventHandler : IPomodoroEventHandler
 {
-    public void OnWorkStarted(object? sender, PomodoroEventArgs e)
-    {
-        Console.WriteLine($"[WORK] {e.Title}: {e.Description}");
-    }
+  public void OnWorkStarted(object? sender, PomodoroEventArgs e)
+  {
+    Console.WriteLine($"[WORK] {e.Title}: {e.Description}");
+  }
 
-    public void OnRestStarted(object? sender, PomodoroEventArgs e)
-    {
-        Console.WriteLine($"[REST] {e.Title}: Time to rest!");
-    }
+  public void OnRestStarted(object? sender, PomodoroEventArgs e)
+  {
+    Console.WriteLine($"[REST] {e.Title}: Time to rest!");
+  }
 
-    public void OnBlockCompleted(object? sender, PomodoroEventArgs e)
+  public void OnBlockCompleted(object? sender, PomodoroEventArgs e)
+  {
+    Console.WriteLine($"[DONE] {e.Title}: Block completed.");
+  }
+}
+
+public class OverlayEventHandler : IPomodoroEventHandler
+{
+  private static bool SendMessage(string title, string body)
+  {
+    int port = 7777;
+    string msg = $"bottompopup {title}|{body}";
+
+    try
     {
-        Console.WriteLine($"[DONE] {e.Title}: Block completed.");
+      using (var client = new TcpClient("127.0.0.1", port))
+      using (var stream = client.GetStream())
+      {
+        byte[] bytes = Encoding.UTF8.GetBytes(msg + "\n");
+        stream.Write(bytes, 0, bytes.Length);
+        stream.Flush();
+      }
+      // Console.WriteLine($"BottomPopup sent: {msg}");
     }
+    catch (Exception ex)
+    {
+      // Console.WriteLine($"BottomPopup failed: {ex.Message}");
+      return false;
+    }
+    return true;
+  }
+
+  public void OnWorkStarted(object? sender, PomodoroEventArgs e)
+  {
+    SendMessage($"🍅 Start Task {e.Title}", e.Description);
+  }
+
+  public void OnRestStarted(object? sender, PomodoroEventArgs e)
+  {
+    SendMessage($"🍅 Break", e.Description);
+  }
+
+  public void OnBlockCompleted(object? sender, PomodoroEventArgs e)
+  {
+    SendMessage($"🍅 Block Completed", e.Description);
+  }
 }
