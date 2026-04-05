@@ -1,4 +1,7 @@
+using System.Text;
 using Pomodoro;
+
+Console.OutputEncoding = Encoding.UTF8;
 
 var events = new ConsolePomodoroEvent();
 var timer = new PomodoroTimer("Feature Development", "Work on the new authentication flow", 1, 1);
