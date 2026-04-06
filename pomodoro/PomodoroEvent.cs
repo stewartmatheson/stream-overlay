@@ -59,9 +59,14 @@ public class EventTitleBuilder
 
 public class EventMessageBodyBuilder
 {
-  public static string WorkSummaryBody(PomodoroEventArgs e)
+  public static string WorkSummary(PomodoroEventArgs e)
   {
     return $"{e.Description} Task Time Remaining {e.TimeRemaining}";
+  }
+
+  public static string RestSummary(PomodoroEventArgs e)
+  {
+    return $"Chill, relax take it easy... {e.TimeRemaining}";
   }
 }
 
@@ -69,22 +74,22 @@ public class ConsoleEventHandler : IPomodoroEventHandler
 {
   public void OnWorkStarted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.WorkStartedTitle(e), EventMessageBodyBuilder.WorkSummaryBody(e));
+    SendMessage(EventTitleBuilder.WorkStartedTitle(e), EventMessageBodyBuilder.WorkSummary(e));
   }
 
   public void OnRestStarted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.RestStartedTitle(e), "");
+    SendMessage(EventTitleBuilder.RestStartedTitle(e), EventMessageBodyBuilder.RestSummary(e));
   }
 
   public void OnBlockCompleted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.BlockCompletedTitle(e), EventMessageBodyBuilder.WorkSummaryBody(e));
+    SendMessage(EventTitleBuilder.BlockCompletedTitle(e), EventMessageBodyBuilder.WorkSummary(e));
   }
 
   public void OnIntervalElapsed(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.IntervalTitle(e), EventMessageBodyBuilder.WorkSummaryBody(e));
+    SendMessage(EventTitleBuilder.IntervalTitle(e), EventMessageBodyBuilder.WorkSummary(e));
   }
 
   private static void SendMessage(string title, string body)
@@ -111,7 +116,7 @@ public class OverlayEventHandler : IPomodoroEventHandler
 
   public void OnWorkStarted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.WorkStartedTitle(e), EventMessageBodyBuilder.WorkSummaryBody(e));
+    SendMessage(EventTitleBuilder.WorkStartedTitle(e), EventMessageBodyBuilder.WorkSummary(e));
   }
 
   public void OnRestStarted(object? sender, PomodoroEventArgs e)
@@ -121,12 +126,12 @@ public class OverlayEventHandler : IPomodoroEventHandler
 
   public void OnBlockCompleted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.BlockCompletedTitle(e), EventMessageBodyBuilder.WorkSummaryBody(e));
+    SendMessage(EventTitleBuilder.BlockCompletedTitle(e), EventMessageBodyBuilder.WorkSummary(e));
   }
 
   public void OnIntervalElapsed(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.IntervalTitle(e), EventMessageBodyBuilder.WorkSummaryBody(e));
+    SendMessage(EventTitleBuilder.IntervalTitle(e), EventMessageBodyBuilder.WorkSummary(e));
   }
 
 }
