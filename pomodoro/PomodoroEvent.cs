@@ -23,6 +23,7 @@ public interface IPomodoroEventHandler
   void OnWorkStarted(object? sender, PomodoroEventArgs e);
   void OnRestStarted(object? sender, PomodoroEventArgs e);
   void OnBlockCompleted(object? sender, PomodoroEventArgs e);
+  void OnIntervalElapsed(object? sender, PomodoroEventArgs e);
 }
 
 public class ConsoleEventHandler : IPomodoroEventHandler
@@ -41,32 +42,25 @@ public class ConsoleEventHandler : IPomodoroEventHandler
   {
     Console.WriteLine($"[DONE] {e.Title}: Block completed.");
   }
+
+  public void OnIntervalElapsed(object? sender, PomodoroEventArgs e)
+  {
+    Console.WriteLine($"[INTERVAL] {e.Title}: Interval elapsed.");
+  }
 }
 
 public class OverlayEventHandler : IPomodoroEventHandler
 {
-  private static bool SendMessage(string title, string body)
+  private static void SendMessage(string title, string body)
   {
     int port = 7777;
     string msg = $"bottompopup {title}|{body}";
 
-    try
-    {
-      using (var client = new TcpClient("127.0.0.1", port))
-      using (var stream = client.GetStream())
-      {
-        byte[] bytes = Encoding.UTF8.GetBytes(msg + "\n");
-        stream.Write(bytes, 0, bytes.Length);
-        stream.Flush();
-      }
-      // Console.WriteLine($"BottomPopup sent: {msg}");
-    }
-    catch (Exception ex)
-    {
-      // Console.WriteLine($"BottomPopup failed: {ex.Message}");
-      return false;
-    }
-    return true;
+    using var client = new TcpClient("127.0.0.1", port);
+    using var stream = client.GetStream();
+    byte[] bytes = Encoding.UTF8.GetBytes(msg + "\n");
+    stream.Write(bytes, 0, bytes.Length);
+    stream.Flush();
   }
 
   public void OnWorkStarted(object? sender, PomodoroEventArgs e)
@@ -82,5 +76,10 @@ public class OverlayEventHandler : IPomodoroEventHandler
   public void OnBlockCompleted(object? sender, PomodoroEventArgs e)
   {
     SendMessage($"🍅 Block Completed", e.Description);
+  }
+
+  public void OnIntervalElapsed(object? sender, PomodoroEventArgs e)
+  {
+    SendMessage($"🍅 Interval", e.Description);
   }
 }

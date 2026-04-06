@@ -25,6 +25,7 @@ foreach (TimeBlock timeBlock in sechedule.TimeBlocks)
     timeBlock.Title,
     timeBlock.Description,
     1,
+    1,
     1
   );
 
