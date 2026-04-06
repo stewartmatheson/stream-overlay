@@ -20,12 +20,6 @@ styled to match the Tokyo Night theme. Alerts hover at the bottom of the
 screen for a set duration then fade out. They are triggered by commands
 that include an alert title and body text, displayed title-above-text.
 
-## Mode: Pomodoro (Not Implemented)
-
-Sets a 25 minute timer for tasks and insists on a 5 minute break. This
-should be visible at all times and should alert when the timer runs out.
-It should have the tomato emoji displayed.
-
 ## Tech
 
 We should render with true Direct2D so the background of the window is
@@ -97,3 +91,16 @@ cmake -B build/vs -G "Visual Studio 17 2022" -A x64
 ```
 
 Then open `build/vs/stream-overlay.sln` in Visual Studio.
+
+## Future Features
+
+1.  Can we display messages for a time that suits how much text there is
+    in the message. Is there an algo that can convert string length in
+    to time required to read.
+
+2.  Constatnt timeer display so people can see the pomodoro clock
+    ticking down.
+
+3.  Some sort of markup in the message text allowing for setting bold
+    and colours in the overlay text. Can we use something like bbcode
+    for this?

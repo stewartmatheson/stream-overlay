@@ -25,8 +25,14 @@ public class TimeBlock
   [JsonPropertyName("restDuration")]
   public int RestDuration { get; set; }
 
-  [JsonPropertyName("title")]
-  public string Title { get; set; } = "";
+  [JsonPropertyName("task")]
+  public PomodoroTask Task { get; set; } = new();
+}
+
+public class PomodoroTask
+{
+  [JsonPropertyName("name")]
+  public string Name { get; set; } = "";
 
   [JsonPropertyName("description")]
   public string Description { get; set; } = "";

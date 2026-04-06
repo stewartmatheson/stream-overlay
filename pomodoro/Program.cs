@@ -16,14 +16,14 @@ Console.CancelKeyPress += (_, e) =>
 };
 
 Console.WriteLine(
-  "🍅 Pomodoro timer started. Press Ctrl+C to stop."
+  "Pomodoro timer started. Press Ctrl+C to stop."
 );
 
 foreach (TimeBlock timeBlock in sechedule.TimeBlocks)
 {
   var timer = new PomodoroTimer(
-    timeBlock.Title,
-    timeBlock.Description,
+    timeBlock.Task.Name,
+    timeBlock.Task.Description,
     timeBlock.WorkDuration,
     timeBlock.RestDuration,
     1

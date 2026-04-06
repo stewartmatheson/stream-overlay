@@ -28,26 +28,70 @@ public interface IPomodoroEventHandler
   void OnIntervalElapsed(object? sender, PomodoroEventArgs e);
 }
 
+public class EventTitleBuilder
+{
+
+  private static string MessagePrefix()
+  {
+    return "🍅 Pomodoro: ";
+  }
+
+  public static string WorkStartedTitle(PomodoroEventArgs e)
+  {
+    return MessagePrefix() + $"[Started Task] {e.Title}";
+  }
+
+  public static string RestStartedTitle(PomodoroEventArgs e)
+  {
+    return MessagePrefix() + "Rest";
+  }
+
+  public static string BlockCompletedTitle(PomodoroEventArgs e)
+  {
+    return MessagePrefix() + "Task Complete";
+  }
+
+  public static string IntervalTitle(PomodoroEventArgs e)
+  {
+    return MessagePrefix() + "Task In Progres";
+  }
+}
+
+public class EventMessageBodyBuilder
+{
+  public static string WorkSummaryBody(PomodoroEventArgs e)
+  {
+    return $"{e.Description} Task Time Remaining {e.TimeRemaining}";
+  }
+}
+
 public class ConsoleEventHandler : IPomodoroEventHandler
 {
   public void OnWorkStarted(object? sender, PomodoroEventArgs e)
   {
-    Console.WriteLine($"[WORK] {e.Title}: {e.Description}");
+    SendMessage(EventTitleBuilder.WorkStartedTitle(e), EventMessageBodyBuilder.WorkSummaryBody(e));
   }
 
   public void OnRestStarted(object? sender, PomodoroEventArgs e)
   {
-    Console.WriteLine($"[REST] {e.Title}: Time to rest!");
+    SendMessage(EventTitleBuilder.RestStartedTitle(e), "");
   }
 
   public void OnBlockCompleted(object? sender, PomodoroEventArgs e)
   {
-    Console.WriteLine($"[DONE] {e.Title}: Block completed.");
+    SendMessage(EventTitleBuilder.BlockCompletedTitle(e), EventMessageBodyBuilder.WorkSummaryBody(e));
   }
 
   public void OnIntervalElapsed(object? sender, PomodoroEventArgs e)
   {
-    Console.WriteLine($"[INTERVAL] {e.Title}: {e.TimeRemaining.TotalMinutes:0} minutes remaining.");
+    SendMessage(EventTitleBuilder.IntervalTitle(e), EventMessageBodyBuilder.WorkSummaryBody(e));
+  }
+
+  private static void SendMessage(string title, string body)
+  {
+    Console.WriteLine(title);
+    Console.WriteLine(body);
+    Console.WriteLine("");
   }
 }
 
@@ -67,21 +111,22 @@ public class OverlayEventHandler : IPomodoroEventHandler
 
   public void OnWorkStarted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage($"🍅 Start Task {e.Title}", e.Description);
+    SendMessage(EventTitleBuilder.WorkStartedTitle(e), EventMessageBodyBuilder.WorkSummaryBody(e));
   }
 
   public void OnRestStarted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage($"🍅 Break", e.Description);
+    SendMessage(EventTitleBuilder.RestStartedTitle(e), "");
   }
 
   public void OnBlockCompleted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage($"🍅 Block Completed", e.Description);
+    SendMessage(EventTitleBuilder.BlockCompletedTitle(e), EventMessageBodyBuilder.WorkSummaryBody(e));
   }
 
   public void OnIntervalElapsed(object? sender, PomodoroEventArgs e)
   {
-    SendMessage($"🍅 {e.TimeRemaining.TotalMinutes:0} minutes remaining", e.Description);
+    SendMessage(EventTitleBuilder.IntervalTitle(e), EventMessageBodyBuilder.WorkSummaryBody(e));
   }
+
 }
