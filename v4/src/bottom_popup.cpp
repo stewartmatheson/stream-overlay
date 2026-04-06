@@ -1,5 +1,6 @@
 #include "bottom_popup.h"
 #include <algorithm>
+#include <cctype>
 #include <charconv>
 #include <vector>
 
@@ -15,6 +16,27 @@ std::wstring BottomPopup::to_wide(std::string_view s) {
     std::wstring out(len, L'\0');
     MultiByteToWideChar(CP_UTF8, 0, s.data(), static_cast<int>(s.size()), out.data(), len);
     return out;
+}
+
+int BottomPopup::count_words(std::string_view s) {
+    int count = 0;
+    bool in_word = false;
+    for (char c : s) {
+        if (std::isspace(static_cast<unsigned char>(c))) {
+            in_word = false;
+        } else if (!in_word) {
+            in_word = true;
+            ++count;
+        }
+    }
+    return count;
+}
+
+float BottomPopup::compute_display_time(std::string_view title, std::string_view body) {
+    int words = count_words(title) + count_words(body);
+    float reading_secs = (static_cast<float>(words) / kReadingWPM) * 60.f;
+    float t = reading_secs + kDisplayPadding;
+    return t > kMinDisplayTime ? t : kMinDisplayTime;
 }
 
 D2D1_COLOR_F BottomPopup::parse_color(std::string_view s, D2D1_COLOR_F fallback) {
@@ -56,6 +78,7 @@ bool BottomPopup::on_command(std::string_view command, std::string_view args) {
     p.body  = to_wide(fields[1]);
     if (fields.size() >= 3) p.border_color = parse_color(fields[2], colors::accent);
     if (fields.size() >= 4) p.bg_color     = parse_color(fields[3], colors::bg);
+    p.display_time = compute_display_time(fields[0], fields[1]);
 
     if (state_ == State::Idle) {
         current_ = std::move(p);
@@ -89,7 +112,7 @@ void BottomPopup::update(float dt) {
 
     case State::Display:
         display_t_ += dt;
-        if (display_t_ >= kDisplayTime) {
+        if (display_t_ >= current_.display_time) {
             state_ = State::SlideOut;
             anim_t_ = 0.f;
         }
