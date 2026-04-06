@@ -31,23 +31,20 @@ public class PomodoroTimer
 
   public async Task RunAsync(CancellationToken cancellationToken = default)
   {
-    var args = new PomodoroEventArgs(_title, _description, true);
-
-    WorkStarted?.Invoke(this, args);
+    WorkStarted?.Invoke(this, new PomodoroEventArgs(_title, _description, true, _workDuration));
 
     var remaining = _workDuration;
     while (remaining > _intervalDuration)
     {
       await Task.Delay(_intervalDuration, cancellationToken);
       remaining -= _intervalDuration;
-      IntervalElapsed?.Invoke(this, args);
+      IntervalElapsed?.Invoke(this, new PomodoroEventArgs(_title, _description, true, remaining));
     }
     await Task.Delay(remaining, cancellationToken);
 
-    var restArgs = new PomodoroEventArgs(_title, _description, false);
-    RestStarted?.Invoke(this, restArgs);
+    RestStarted?.Invoke(this, new PomodoroEventArgs(_title, _description, false, _restDuration));
     await Task.Delay(_restDuration, cancellationToken);
 
-    BlockCompleted?.Invoke(this, args);
+    BlockCompleted?.Invoke(this, new PomodoroEventArgs(_title, _description, true, TimeSpan.Zero));
   }
 }

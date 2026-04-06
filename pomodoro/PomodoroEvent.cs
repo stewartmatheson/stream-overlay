@@ -9,12 +9,14 @@ public class PomodoroEventArgs : EventArgs
   public string Title { get; }
   public string Description { get; }
   public bool IsWorkPhase { get; }
+  public TimeSpan TimeRemaining { get; }
 
-  public PomodoroEventArgs(string title, string description, bool isWorkPhase)
+  public PomodoroEventArgs(string title, string description, bool isWorkPhase, TimeSpan timeRemaining)
   {
     Title = title;
     Description = description;
     IsWorkPhase = isWorkPhase;
+    TimeRemaining = timeRemaining;
   }
 }
 
@@ -45,7 +47,7 @@ public class ConsoleEventHandler : IPomodoroEventHandler
 
   public void OnIntervalElapsed(object? sender, PomodoroEventArgs e)
   {
-    Console.WriteLine($"[INTERVAL] {e.Title}: Interval elapsed.");
+    Console.WriteLine($"[INTERVAL] {e.Title}: {e.TimeRemaining.TotalMinutes:0} minutes remaining.");
   }
 }
 
@@ -80,6 +82,6 @@ public class OverlayEventHandler : IPomodoroEventHandler
 
   public void OnIntervalElapsed(object? sender, PomodoroEventArgs e)
   {
-    SendMessage($"🍅 Interval", e.Description);
+    SendMessage($"🍅 {e.TimeRemaining.TotalMinutes:0} minutes remaining", e.Description);
   }
 }

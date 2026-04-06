@@ -24,8 +24,8 @@ foreach (TimeBlock timeBlock in sechedule.TimeBlocks)
   var timer = new PomodoroTimer(
     timeBlock.Title,
     timeBlock.Description,
-    1,
-    1,
+    timeBlock.WorkDuration,
+    timeBlock.RestDuration,
     1
   );
 
