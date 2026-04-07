@@ -125,7 +125,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
     // Register modes
     g_modes.push_back(std::make_unique<Timer>());
-    // g_modes.push_back(std::make_unique<BottomPopup>());
+    g_modes.push_back(std::make_unique<BottomPopup>());
 
     // Start TCP server
     if (!g_server.start(7777)) return 1;
