@@ -66,6 +66,30 @@ longer. A minimum display time of 3 seconds is enforced.
 .\scripts\send-bottompopup.ps1 -Title "Hi" -Body "Test" -Port 9999
 ```
 
+### Mode: Timer
+
+#### `timer Label|MM:SS|X,Y`
+
+Displays a countdown timer at the given pixel position. If a timer is
+already running it is replaced. The timer auto-hides when it reaches
+zero. Fields are pipe-delimited.
+
+  Parameter       Type     Description
+  --------------- -------- -----------------------------------
+  `Label`         string   Text shown before the time
+  `MM:SS`         string   Initial countdown duration
+  `X,Y`           string   Screen position in pixels
+
+Example:
+
+``` text
+timer Break|05:00|100,50
+```
+
+#### `timer_clear`
+
+Hides the current timer immediately.
+
 ### BBCode Formatting
 
 The `Body` field supports BBCode tags for inline formatting. Tags can be
@@ -113,8 +137,7 @@ Then open `build/vs/stream-overlay.sln` in Visual Studio.
 
 ## Future Features
 
-1.  Constatnt timer display so people can see the pomodoro clock ticking
-    down.
+### Window at the Bottom
 
-2.  Start the app so the window is always at the bottom of all other
-    already open windows. Can we make it stay at the bottom?
+Start the app so the window is always at the bottom of all other already
+open windows. Can we make it stay at the bottom?

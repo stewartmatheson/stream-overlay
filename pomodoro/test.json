@@ -1,16 +1,16 @@
 {
   "timeBlocks": [
     {
-      "workDuration": 5,
-      "restDuration": 1,
+      "workDuration": 25,
+      "restDuration": 5,
       "task": {
         "name": "Refactoring the pomodoro messages",
         "description": "Lets get really good messages in our pomodoro system!!! Hype!"
       }
     },
     {
-      "workDuration": 5,
-      "restDuration": 1,
+      "workDuration": 25,
+      "restDuration": 5,
       "task": {
         "name": "Streamer.bot args correctly get sent to stream overlay",
         "description": "Currently our stream overlay is getting a generic set of messages from Streamer.bot, lets make them better."

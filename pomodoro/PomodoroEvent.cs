@@ -107,36 +107,50 @@ public class ConsoleEventHandler : IPomodoroEventHandler
 
 public class OverlayEventHandler : IPomodoroEventHandler
 {
-  private static void SendMessage(string title, string body)
-  {
-    int port = 7777;
-    string msg = $"bottompopup {title}|{body}";
+  private const int Port = 7777;
+  private const string Host = "127.0.0.1";
 
-    using var client = new TcpClient("127.0.0.1", port);
+  private static void SendTcp(string msg)
+  {
+    using var client = new TcpClient(Host, Port);
     using var stream = client.GetStream();
     byte[] bytes = Encoding.UTF8.GetBytes(msg + "\n");
     stream.Write(bytes, 0, bytes.Length);
     stream.Flush();
   }
 
+  private static void SendBottomPopupMessage(string title, string body)
+  {
+    SendTcp($"bottompopup {title}|{body}");
+  }
+
+  private static void SendTimerCommand(string label, TimeSpan remaining, int x = 1459, int y = 1046)
+  {
+    int minutes = (int)remaining.TotalMinutes;
+    int seconds = remaining.Seconds;
+    SendTcp($"timer {label}|{minutes:D2}:{seconds:D2}|{x},{y}");
+  }
+
   public void OnWorkStarted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.WorkStartedTitle(e), EventMessageBodyBuilder.WorkSummary(e));
+    SendBottomPopupMessage(EventTitleBuilder.WorkStartedTitle(e), EventMessageBodyBuilder.WorkSummary(e));
+    SendTimerCommand("🍅", e.TimeRemaining);
   }
 
   public void OnRestStarted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.RestStartedTitle(e), EventMessageBodyBuilder.RestSummary(e));
+    SendBottomPopupMessage(EventTitleBuilder.RestStartedTitle(e), EventMessageBodyBuilder.RestSummary(e));
+    SendTimerCommand("🍅", e.TimeRemaining);
   }
 
   public void OnBlockCompleted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.BlockCompletedTitle(e), EventMessageBodyBuilder.WorkSummary(e));
+    SendBottomPopupMessage(EventTitleBuilder.BlockCompletedTitle(e), EventMessageBodyBuilder.WorkSummary(e));
   }
 
   public void OnIntervalElapsed(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.IntervalTitle(e), EventMessageBodyBuilder.WorkSummary(e));
+    SendBottomPopupMessage(EventTitleBuilder.IntervalTitle(e), EventMessageBodyBuilder.WorkSummary(e));
   }
 
 }

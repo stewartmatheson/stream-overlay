@@ -32,6 +32,7 @@ public:
     void draw_rounded_rect(D2D1_RECT_F rect, D2D1_COLOR_F fill, D2D1_COLOR_F border,
                            float radius = 10.f, float border_width = 2.f);
     void draw_text(std::wstring_view text, D2D1_RECT_F rect, D2D1_COLOR_F color, bool is_title = false);
+    void draw_text_bold(std::wstring_view text, D2D1_RECT_F rect, D2D1_COLOR_F color);
     void draw_rich_text(const std::wstring& text, const std::vector<TextSpan>& spans,
                         D2D1_RECT_F rect, D2D1_COLOR_F color, bool is_title = false);
     void draw_border(D2D1_RECT_F rect, D2D1_COLOR_F color, float width = 2.f);
@@ -65,6 +66,7 @@ private:
     ComPtr<IDWriteFactory>     dwrite_;
     ComPtr<IDWriteTextFormat>  title_fmt_;
     ComPtr<IDWriteTextFormat>  body_fmt_;
+    ComPtr<IDWriteTextFormat>  timer_fmt_;
 
     bool create_swap_chain();
     bool create_render_target();

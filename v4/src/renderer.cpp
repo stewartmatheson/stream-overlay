@@ -52,6 +52,11 @@ bool Renderer::init(HWND hwnd) {
         DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
         20.f, L"en-us", body_fmt_.GetAddressOf());
 
+    dwrite_->CreateTextFormat(L"JetBrainsMono Nerd Font", nullptr,
+        DWRITE_FONT_WEIGHT_EXTRA_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+        20.f, L"en-us", timer_fmt_.GetAddressOf());
+    if (timer_fmt_) timer_fmt_->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
+
     if (title_fmt_) title_fmt_->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
     if (body_fmt_)  body_fmt_->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
 
@@ -170,6 +175,13 @@ void Renderer::draw_rounded_rect(D2D1_RECT_F rect, D2D1_COLOR_F fill, D2D1_COLOR
 
     brush_->SetColor(border);
     dc_->DrawRoundedRectangle(rr, brush_.Get(), border_width);
+}
+
+void Renderer::draw_text_bold(std::wstring_view text, D2D1_RECT_F rect, D2D1_COLOR_F color) {
+    brush_->SetColor(color);
+    dc_->DrawText(text.data(), static_cast<UINT32>(text.size()),
+        timer_fmt_.Get(), rect, brush_.Get(),
+        D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT);
 }
 
 void Renderer::draw_text(std::wstring_view text, D2D1_RECT_F rect, D2D1_COLOR_F color, bool is_title) {
