@@ -9,6 +9,7 @@ add_executable(stream-overlay WIN32
     src/renderer.cpp
     src/tcp_server.cpp
     src/bottom_popup.cpp
+    src/bbcode.cpp
 )
 
 target_link_libraries(stream-overlay PRIVATE

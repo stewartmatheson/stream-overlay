@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bbcode.h"
 #include "mode.h"
 #include "renderer.h"
 #include <deque>
@@ -17,6 +18,7 @@ private:
     struct Popup {
         std::wstring title;
         std::wstring body;
+        std::vector<TextSpan> body_spans;
         //D2D1_COLOR_F border_color = colors::accent;
         D2D1_COLOR_F border_color = colors::bg;
         D2D1_COLOR_F bg_color     = colors::bg;

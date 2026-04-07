@@ -38,7 +38,7 @@ public class EventTitleBuilder
 
   public static string WorkStartedTitle(PomodoroEventArgs e)
   {
-    return MessagePrefix() + $"[Started Task] {e.Title}";
+    return MessagePrefix() + $"Started Task {e.Title}";
   }
 
   public static string RestStartedTitle(PomodoroEventArgs e)
@@ -61,12 +61,17 @@ public class EventMessageBodyBuilder
 {
   public static string WorkSummary(PomodoroEventArgs e)
   {
-    return $"{e.Description} Task Time Remaining {e.TimeRemaining}";
+    return $"{TimeRemaining(e)} {e.Description}";
   }
 
   public static string RestSummary(PomodoroEventArgs e)
   {
-    return $"Chill, relax take it easy... {e.TimeRemaining}";
+    return $"{TimeRemaining(e)} Chill, relax, take it easy ";
+  }
+
+  private static string TimeRemaining(PomodoroEventArgs e)
+  {
+    return $"[[color=e0af68][b]⏰ {e.TimeRemaining}[/b][/color]]";
   }
 }
 
@@ -121,7 +126,7 @@ public class OverlayEventHandler : IPomodoroEventHandler
 
   public void OnRestStarted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.RestStartedTitle(e), "");
+    SendMessage(EventTitleBuilder.RestStartedTitle(e), EventMessageBodyBuilder.RestSummary(e));
   }
 
   public void OnBlockCompleted(object? sender, PomodoroEventArgs e)

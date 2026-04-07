@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "bbcode.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -45,11 +46,11 @@ bool Renderer::init(HWND hwnd) {
 
     dwrite_->CreateTextFormat(L"JetBrainsMono Nerd Font", nullptr,
         DWRITE_FONT_WEIGHT_EXTRA_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
-        22.f, L"en-us", title_fmt_.GetAddressOf());
+        26.f, L"en-us", title_fmt_.GetAddressOf());
 
     dwrite_->CreateTextFormat(L"JetBrainsMono Nerd Font", nullptr,
-        DWRITE_FONT_WEIGHT_EXTRA_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
-        16.f, L"en-us", body_fmt_.GetAddressOf());
+        DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+        20.f, L"en-us", body_fmt_.GetAddressOf());
 
     if (title_fmt_) title_fmt_->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
     if (body_fmt_)  body_fmt_->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
@@ -176,6 +177,41 @@ void Renderer::draw_text(std::wstring_view text, D2D1_RECT_F rect, D2D1_COLOR_F 
     dc_->DrawText(text.data(), static_cast<UINT32>(text.size()),
         is_title ? title_fmt_.Get() : body_fmt_.Get(), rect, brush_.Get(),
         D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT);
+}
+
+void Renderer::draw_rich_text(const std::wstring& text, const std::vector<TextSpan>& spans,
+                               D2D1_RECT_F rect, D2D1_COLOR_F color, bool is_title) {
+    IDWriteTextFormat* fmt = is_title ? title_fmt_.Get() : body_fmt_.Get();
+    float max_w = rect.right - rect.left;
+    float max_h = rect.bottom - rect.top;
+
+    ComPtr<IDWriteTextLayout> layout;
+    HRESULT hr = dwrite_->CreateTextLayout(text.c_str(), static_cast<UINT32>(text.size()),
+                                           fmt, max_w, max_h, layout.GetAddressOf());
+    if (FAILED(hr)) return;
+
+    for (const auto& span : spans) {
+        DWRITE_TEXT_RANGE range{span.start, span.length};
+        switch (span.type) {
+        case TextSpan::Bold:
+            // This might not always work for each font
+            layout->SetFontWeight(DWRITE_FONT_WEIGHT_EXTRA_BOLD, range);
+            break;
+        case TextSpan::Italic:
+            layout->SetFontStyle(DWRITE_FONT_STYLE_ITALIC, range);
+            break;
+        case TextSpan::Color: {
+            ComPtr<ID2D1SolidColorBrush> color_brush;
+            dc_->CreateSolidColorBrush(span.color, color_brush.GetAddressOf());
+            if (color_brush) layout->SetDrawingEffect(color_brush.Get(), range);
+            break;
+        }
+        }
+    }
+
+    brush_->SetColor(color);
+    dc_->DrawTextLayout({rect.left, rect.top}, layout.Get(), brush_.Get(),
+                        D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT);
 }
 
 void Renderer::draw_border(D2D1_RECT_F rect, D2D1_COLOR_F color, float width) {

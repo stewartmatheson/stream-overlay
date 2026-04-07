@@ -75,7 +75,9 @@ bool BottomPopup::on_command(std::string_view command, std::string_view args) {
 
     Popup p;
     p.title = to_wide(fields[0]);
-    p.body  = to_wide(fields[1]);
+    auto parsed = parse_bbcode(to_wide(fields[1]));
+    p.body       = std::move(parsed.text);
+    p.body_spans = std::move(parsed.spans);
     if (fields.size() >= 3) p.border_color = parse_color(fields[2], colors::accent);
     if (fields.size() >= 4) p.bg_color     = parse_color(fields[3], colors::bg);
     p.display_time = compute_display_time(fields[0], fields[1]);
@@ -157,5 +159,5 @@ void BottomPopup::render(Renderer& r) {
     D2D1_RECT_F body_rect  = {rect.left + kPad, rect.top + kPad + kTitleHeight + kTitleBodyGap, rect.right - kPad, rect.bottom - kPad};
 
     r.draw_text(current_.title, title_rect, colors::title, true);
-    r.draw_text(current_.body, body_rect, colors::fg, false);
+    r.draw_rich_text(current_.body, current_.body_spans, body_rect, colors::fg, false);
 }

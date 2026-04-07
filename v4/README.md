@@ -39,12 +39,14 @@ Commands are sent as newline-terminated strings to TCP port `7777`.
 
 Displays a popup that slides in from the bottom of the screen. Fields
 are pipe-delimited. Colors are optional and default to the Tokyo Night
-theme.
+theme. Display duration scales automatically based on word count
+(configurable, default 150 WPM) so longer messages stay on screen
+longer. A minimum display time of 3 seconds is enforced.
 
   Parameter       Type     Description
-  --------------- -------- ---------------------------
+  --------------- -------- -----------------------------------
   `Title`         string   Popup heading text
-  `Body`          string   Popup body text
+  `Body`          string   Popup body text (supports BBCode)
   `BorderColor`   string   Optional border color
   `BgColor`       string   Optional background color
 
@@ -62,6 +64,23 @@ theme.
 
 # Custom port
 .\scripts\send-bottompopup.ps1 -Title "Hi" -Body "Test" -Port 9999
+```
+
+### BBCode Formatting
+
+The `Body` field supports BBCode tags for inline formatting. Tags can be
+nested.
+
+  Tag                               Effect
+  --------------------------------- -----------------------
+  `[b]text[/b]` B                   old
+  `[i]text[/i]` I                   talic
+  \`\[color=#RRGGBB\]text\[/color   \]\` Text color (hex)
+
+Example:
+
+``` text
+bottompopup Alert|This is [b]bold[/b], [i]italic[/i], and [color=#FF6600]orange[/color]
 ```
 
 ## Build
@@ -97,6 +116,5 @@ Then open `build/vs/stream-overlay.sln` in Visual Studio.
 1.  Constatnt timer display so people can see the pomodoro clock ticking
     down.
 
-2.  Some sort of markup in the message text allowing for setting bold
-    and colours in the overlay text. Can we use something like bbcode
-    for this?
+2.  Start the app so the window is always at the bottom of all other
+    already open windows. Can we make it stay at the bottom?
