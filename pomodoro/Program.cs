@@ -10,6 +10,16 @@ if (args.Length > 0 && args[0] == "server")
 {
   await RunServer();
 }
+else if (args.Length >= 2 && args[0] == "add")
+{
+  var taskName = string.Join(' ', args.Skip(1));
+  await SendCommand($"ADD:{taskName}");
+}
+else if (args.Length > 0 && args[0] == "status")
+{
+  var response = await SendCommandWithResponse("STATUS");
+  Console.Write(response);
+}
 else
 {
   await RunClient();
@@ -18,11 +28,28 @@ else
 async Task RunClient()
 {
   var json = await Console.In.ReadToEndAsync();
+  await SendCommand($"SCHEDULE:{json}");
+}
 
+async Task SendCommand(string message)
+{
   using var client = new TcpClient("127.0.0.1", Port);
   using var stream = client.GetStream();
-  var bytes = Encoding.UTF8.GetBytes(json);
+  var bytes = Encoding.UTF8.GetBytes(message);
   stream.Write(bytes, 0, bytes.Length);
+  client.Client.Shutdown(SocketShutdown.Send);
+}
+
+async Task<string> SendCommandWithResponse(string message)
+{
+  using var client = new TcpClient("127.0.0.1", Port);
+  using var stream = client.GetStream();
+  var bytes = Encoding.UTF8.GetBytes(message);
+  stream.Write(bytes, 0, bytes.Length);
+  client.Client.Shutdown(SocketShutdown.Send);
+
+  using var reader = new StreamReader(stream, Encoding.UTF8);
+  return await reader.ReadToEndAsync();
 }
 
 async Task RunServer()
@@ -43,7 +70,7 @@ async Task RunServer()
     appCts.Cancel();
   };
 
-  CancellationTokenSource? scheduleCts = null;
+  var scheduler = new PomodoroScheduler(consoleEventHandler, overlayEventHandler);
 
   while (!appCts.IsCancellationRequested)
   {
@@ -57,69 +84,67 @@ async Task RunServer()
       break;
     }
 
-    string json;
     using (client)
-    using (var reader = new StreamReader(client.GetStream(), Encoding.UTF8))
     {
-      json = await reader.ReadToEndAsync(appCts.Token);
+      var reader = new StreamReader(client.GetStream(), Encoding.UTF8, leaveOpen: true);
+      var message = await reader.ReadToEndAsync(appCts.Token);
+
+      HandleMessage(message, client, scheduler, appCts.Token);
     }
-
-    PomodoroSchedule schedule;
-    try
-    {
-      schedule = JsonSerializer.Deserialize<PomodoroSchedule>(json)
-        ?? throw new InvalidOperationException("Failed to deserialize schedule.");
-      Console.WriteLine($"Received new schedule with {schedule.TimeBlocks.Count} time block(s).");
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine($"Invalid schedule: {ex.Message}");
-      continue;
-    }
-
-    // Cancel any running schedule
-    if (scheduleCts != null)
-    {
-      await scheduleCts.CancelAsync();
-      scheduleCts.Dispose();
-      Console.WriteLine("Cancelled previous schedule.");
-    }
-
-    scheduleCts = CancellationTokenSource.CreateLinkedTokenSource(appCts.Token);
-    var token = scheduleCts.Token;
-
-    // Run the schedule in the background so we can keep listening
-    _ = Task.Run(async () =>
-    {
-      foreach (var timeBlock in schedule.TimeBlocks)
-      {
-        var timer = new PomodoroTimer(
-          timeBlock.Task.Name,
-          timeBlock.Task.Description,
-          timeBlock.WorkDuration,
-          timeBlock.RestDuration,
-          1
-        );
-
-        timer.RegisterEventHandler(consoleEventHandler);
-        timer.RegisterEventHandler(overlayEventHandler);
-
-        try
-        {
-          await timer.RunAsync(token);
-        }
-        catch (OperationCanceledException)
-        {
-          Console.WriteLine("Schedule cancelled.");
-          return;
-        }
-      }
-
-      Console.WriteLine("Schedule complete.");
-    }, token);
   }
 
-  scheduleCts?.Dispose();
+  scheduler.Stop();
   listener.Stop();
   Console.WriteLine("Shutting down.");
+}
+
+void HandleMessage(string message, TcpClient client, PomodoroScheduler scheduler, CancellationToken token)
+{
+  if (message.StartsWith("STATUS"))
+    HandleStatus(client, scheduler);
+  else if (message.StartsWith("ADD:"))
+    HandleAdd(message.Substring(4).Trim(), scheduler, token);
+  else if (message.StartsWith("SCHEDULE:"))
+    HandleSchedule(message, scheduler, token);
+  else
+    throw new Exception("Unknown Command");
+}
+
+void HandleStatus(TcpClient client, PomodoroScheduler scheduler)
+{
+  var status = scheduler.GetStatus();
+  var responseBytes = Encoding.UTF8.GetBytes(status);
+  client.GetStream().Write(responseBytes, 0, responseBytes.Length);
+}
+
+void HandleAdd(string taskName, PomodoroScheduler scheduler, CancellationToken token)
+{
+  var block = new TimeBlock
+  {
+    WorkDuration = 25,
+    RestDuration = 5,
+    Task = new PomodoroTask { Name = taskName, Description = taskName }
+  };
+  scheduler.AddBlock(block, token);
+  Console.WriteLine($"Added task: {taskName}");
+}
+
+void HandleSchedule(string message, PomodoroScheduler scheduler, CancellationToken token)
+{
+  var json = message.Substring("SCHEDULE:".Length);
+
+  PomodoroSchedule schedule;
+  try
+  {
+    schedule = JsonSerializer.Deserialize<PomodoroSchedule>(json)
+      ?? throw new InvalidOperationException("Failed to deserialize schedule.");
+    Console.WriteLine($"Received new schedule with {schedule.TimeBlocks.Count} time block(s).");
+  }
+  catch (Exception ex)
+  {
+    Console.WriteLine($"Invalid schedule: {ex.Message}");
+    return;
+  }
+
+  scheduler.ReplaceSchedule(schedule, token);
 }

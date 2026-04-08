@@ -101,14 +101,53 @@ Publish a self-contained exe and install it to `~/.local/bin`:
 dotnet publish -c Release -r win-x64 --self-contained -o ~/.local/bin
 ```
 
-Then you can run it directly:
+## Commands
+
+### Starting the server
+
+The following in start a server that will not do anything until its been
+given tasks.
 
 ``` bash
 pomodoro server
-cat schedule.json | pomodoro
 ```
 
-Make sure `~/.local/bin` is on your `PATH`.
+### Task JSON
+
+### reset schedule
+
+The server supports a schedule command which provides full control via
+the json above. Just pipe it to the pomodoro command. Note this will
+clear all active timers and restart.
+
+``` bash
+cat schedule.json | pomodoro schedule
+```
+
+### add
+
+At runtime we should be able to add a task to the stack of tasks.
+Calling this command will add the provided task to the end of the task
+list. It will not change any tasks in progress or reset any timers.
+
+``` bash
+pomodoro add "This is the text of the task we want to add"
+```
+
+### status
+
+``` bash
+pomodoro status
+```
+
+View all tasks in the system. This will provde a list in the following
+format
+
+    Active Tasks
+    ------------
+    [4:55] Doing something
+    [25:00] Doing something else
+    [25:00] Doing something else again
 
 ## Tech
 
