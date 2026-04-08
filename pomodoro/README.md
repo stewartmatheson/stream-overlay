@@ -93,6 +93,23 @@ dotnet build
 dotnet run -- server
 ```
 
+## Installation
+
+Publish a self-contained exe and install it to `~/.local/bin`:
+
+``` bash
+dotnet publish -c Release -r win-x64 --self-contained -o ~/.local/bin
+```
+
+Then you can run it directly:
+
+``` bash
+pomodoro server
+cat schedule.json | pomodoro
+```
+
+Make sure `~/.local/bin` is on your `PATH`.
+
 ## Tech
 
 - .NET 10.0

@@ -21,6 +21,12 @@ public class StartCommandController
     });
   }
 
+  public bool IsPomodoroRunning()
+  {
+    var processes = Process.GetProcessesByName("pomodoro");
+    return processes.Length > 0;
+  }
+
   public async Task StartPomodoro(string pomodoroExe, PomodoroConfig pom, List<string> tasks)
   {
     var json = BuildScheduleJson(pom, tasks);
@@ -40,7 +46,7 @@ public class StartCommandController
     await process.WaitForExitAsync();
   }
 
-  private static string BuildScheduleJson(PomodoroConfig pom, List<string> tasks)
+  public static string BuildScheduleJson(PomodoroConfig pom, List<string> tasks)
   {
     var schedule = new
     {
@@ -48,7 +54,7 @@ public class StartCommandController
       {
         workDuration = pom.TaskTime,
         restDuration = pom.RestTime,
-        task = new { name = t, description = "" }
+        task = new { name = t, description = t }
       }).ToArray()
     };
 

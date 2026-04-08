@@ -2,7 +2,7 @@ namespace Socli;
 
 public static class StartCommand
 {
-  public static async Task<int> RunAsync()
+  public static async Task<int> RunAsync(bool debug = false)
   {
     var view = new StartCommandView();
     var controller = new StartCommandController();
@@ -32,7 +32,7 @@ public static class StartCommand
     LaunchAllApplications(controller, view, config);
 
     if (tasks.Count > 0)
-      await RunPomodoro(controller, view, pomodoroExe, config.Pomodoro, tasks);
+      await RunPomodoro(controller, view, pomodoroExe, config.Pomodoro, tasks, debug);
 
     view.ShowSuccess("Stream session started!");
     return 0;
@@ -80,9 +80,22 @@ public static class StartCommand
 
   private static async Task RunPomodoro(
       StartCommandController controller, StartCommandView view,
-      string pomodoroExe, PomodoroConfig pom, List<string> tasks)
+      string pomodoroExe, PomodoroConfig pom, List<string> tasks, bool debug)
   {
+    if (controller.IsPomodoroRunning())
+    {
+      view.ShowWarning("Pomodoro is already running, skipping.");
+      return;
+    }
+
     view.ShowInfo("Starting pomodoro timer...");
+
+    if (debug)
+    {
+      var json = StartCommandController.BuildScheduleJson(pom, tasks);
+      view.ShowDebugJson(json);
+    }
+
     await controller.StartPomodoro(pomodoroExe, pom, tasks);
   }
 }
