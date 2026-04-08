@@ -71,6 +71,20 @@ public class StartCommandView
         AnsiConsole.Write(new Rule());
     }
 
+    public void RunChecklist(List<string> checklist)
+    {
+        AnsiConsole.Write(new Rule("[yellow]Pre-stream Checklist[/]"));
+        for (var i = 0; i < checklist.Count; i++)
+        {
+            AnsiConsole.Prompt(
+                new TextPrompt<string>($"  [bold][[{i + 1}/{checklist.Count}]][/] {checklist[i]} [grey](press Enter to confirm)[/]")
+                    .AllowEmpty()
+            );
+            AnsiConsole.MarkupLine($"  [green]✓[/] {checklist[i]}");
+        }
+        AnsiConsole.Write(new Rule());
+    }
+
     private void ShowExistingTasks(List<string> tasks)
     {
         ShowInfo("Pomodoro tasks from config:");

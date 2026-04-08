@@ -4,8 +4,8 @@
       "workDuration": 25,
       "restDuration": 5,
       "task": {
-        "name": "Fixing the code hellscape that claude has left me with",
-        "description": "We have an application however do we? We are looking to review, fix and test any issues claude has created for us"
+        "name": "Making our pom timer in to a service",
+        "description": "Given this is a timer application we will need it to somehow run in the background for us so we can pass messages to it"
       }
     }
   ]

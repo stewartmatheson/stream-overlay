@@ -13,6 +13,10 @@ public static class StartCommand
       return 1;
 
     var activity = view.PromptForActivity(config.Activities);
+
+    if (activity.Checklist.Count > 0)
+      view.RunChecklist(activity.Checklist);
+
     var tasks = view.GatherTasks(activity);
 
     view.ShowSessionSummary(config, activity, tasks);
@@ -69,15 +73,8 @@ public static class StartCommand
     view.ShowInfo("Launching applications...");
     foreach (var appPath in config.Applications)
     {
-      try
-      {
-        controller.LaunchApplication(appPath);
-        view.ShowSuccess($"  Started: {appPath}");
-      }
-      catch (Exception ex)
-      {
-        view.ShowError($"  Failed to start {appPath}: {ex.Message}");
-      }
+      controller.LaunchApplication(appPath);
+      view.ShowSuccess($"  Started: {appPath}");
     }
   }
 
@@ -86,13 +83,6 @@ public static class StartCommand
       string pomodoroExe, PomodoroConfig pom, List<string> tasks)
   {
     view.ShowInfo("Starting pomodoro timer...");
-    try
-    {
-      await controller.StartPomodoro(pomodoroExe, pom, tasks);
-    }
-    catch (Exception ex)
-    {
-      view.ShowError($"Pomodoro failed: {ex.Message}");
-    }
+    await controller.StartPomodoro(pomodoroExe, pom, tasks);
   }
 }

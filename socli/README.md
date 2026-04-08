@@ -93,12 +93,22 @@ Configuration is stored in a JSON file `~/.socli.json`
       "notification": "",
       "tags": ["c++", "dotnet", "whatever", "whatever else"],
       "tasks": ["Building the pomodoro JSON with a cli", "Making the Pom timer display better messages"]
+      "checklist": [
+        'Is HDR off?',
+        'Make sure obs is running',
+        'Are the levels correct in obs',
+      ]
     },
     {
       "name": "ESO Gaming",
       "category": "Eso Online",
       "notification": "Watch the noob die.",
-      "tags": ["noob", "noob streamer", "backseating allowed"]
+      "tags": ["noob", "noob streamer", "backseating allowed"],
+      "checklist": [
+        'Is HDR on?',
+        'Make sure obs is running',
+        'Are the levels correct in obs',
+      ]
     }
   ]
 }
