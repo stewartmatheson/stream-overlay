@@ -4,16 +4,8 @@
       "workDuration": 25,
       "restDuration": 5,
       "task": {
-        "name": "Building the pomodoro JSON with a cli",
-        "description": "Finish writing the cli README file for the cli start command."
-      }
-    },
-    {
-      "workDuration": 25,
-      "restDuration": 5,
-      "task": {
-        "name": "Making the Pom timer display better messages",
-        "description": "Pomodoro might not be that well known in some circles. Lets display messages that talk about the current task and do not talk about pomodoro by name."
+        "name": "Fixing the code hellscape that claude has left me with",
+        "description": "We have an application however do we? We are looking to review, fix and test any issues claude has created for us"
       }
     }
   ]

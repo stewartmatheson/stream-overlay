@@ -33,7 +33,7 @@ public class EventTitleBuilder
 
   private static string MessagePrefix()
   {
-    return "🍅 Pomodoro: ";
+    return "🍅 ";
   }
 
   public static string WorkStartedTitle(PomodoroEventArgs e)
