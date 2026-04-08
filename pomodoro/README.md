@@ -145,7 +145,7 @@ format
 
     Active Tasks
     ------------
-    [4:55] Doing something
+    [4:55] Doing something *
     [25:00] Doing something else
     [25:00] Doing something else again
 
