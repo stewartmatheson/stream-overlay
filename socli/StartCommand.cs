@@ -17,9 +17,6 @@ public static class StartCommand
 
     var activity = view.PromptForActivity(config.Activities);
 
-    if (activity.Checklist.Count > 0)
-      view.RunChecklist(activity.Checklist);
-
     var tasks = view.GatherTasks(activity);
 
     view.ShowSessionSummary(config, activity, tasks);
@@ -30,15 +27,75 @@ public static class StartCommand
       return 0;
     }
 
-    view.ShowWarning("TODO: Twitch API integration (set title, tags, notification)");
+    if (!await UpdateTwitch(view, config, activity))
+      return 1;
 
     LaunchAllApplications(controller, view, config);
+
+    if (activity.Checklist.Count > 0)
+      view.RunChecklist(activity.Checklist);
 
     if (tasks.Count > 0)
       await RunPomodoro(controller, view, pomodoroExe, tasks);
 
     view.ShowSuccess("Stream session started!");
     return 0;
+  }
+
+  public static async Task<int> RunUpdateTwitchOnlyAsync()
+  {
+    var view = new StartCommandView();
+    var config = SocliConfig.Load();
+
+    var activity = view.PromptForActivity(config.Activities);
+
+    return await UpdateTwitch(view, config, activity) ? 0 : 1;
+  }
+
+  private static async Task<bool> UpdateTwitch(
+      StartCommandView view, SocliConfig config, Activity activity)
+  {
+    using var twitch = new TwitchService(config);
+
+    if (!twitch.IsConfigured)
+    {
+      view.ShowError("Twitch not configured — add clientId to ~/.socli.json and run: socli twitch-setup");
+      return false;
+    }
+
+    if (!twitch.IsAuthenticated)
+    {
+      view.ShowInfo("Twitch authentication required. Opening browser...");
+      if (!await twitch.AuthenticateAsync())
+      {
+        view.ShowError("Twitch authentication failed.");
+        return false;
+      }
+      view.ShowSuccess("Twitch authenticated!");
+    }
+
+    view.ShowInfo("Updating Twitch channel...");
+
+    var category = await twitch.SearchCategoryAsync(activity.Category)
+      ?? throw new InvalidOperationException($"Could not find Twitch category: {activity.Category}");
+
+    if (!view.ConfirmCategory(activity.Category, category.Name))
+    {
+      view.ShowWarning("Cancelled — category not confirmed.");
+      return false;
+    }
+
+    var result = await twitch.UpdateChannelAsync(activity.Title, category.Id, activity.Tags);
+    if (!result.Success)
+    {
+      view.ShowError($"  Failed to update Twitch channel ({result.StatusCode}).");
+      if (!string.IsNullOrWhiteSpace(result.Error))
+        view.ShowError($"  {result.Error}");
+      return false;
+    }
+
+    view.ShowSuccess("  Twitch channel updated!");
+    return true;
   }
 
   private static async Task<bool> RunPrelaunchChecks(
@@ -93,16 +150,16 @@ public static class StartCommand
     if (config.Applications.Count == 0) return;
 
     view.ShowInfo("Launching applications...");
-    foreach (var appPath in config.Applications)
+    foreach (var app in config.Applications)
     {
-      if (controller.IsApplicationRunning(appPath))
+      if (controller.IsApplicationRunning(app.Path))
       {
-        view.ShowWarning($"  Already running: {appPath}");
+        view.ShowWarning($"  Already running: {app.Path}");
         continue;
       }
 
-      controller.LaunchApplication(appPath);
-      view.ShowSuccess($"  Started: {appPath}");
+      controller.LaunchApplication(app);
+      view.ShowSuccess($"  Started: {app.Path}");
     }
   }
 

@@ -10,7 +10,10 @@ public class StartCommandController
       Uri.TryCreate(app, UriKind.Absolute, out var uri) && uri.Scheme != "file";
 
   public List<string> FindMissingApplications(SocliConfig config) =>
-      config.Applications.Where(app => !IsProtocolUri(app) && !File.Exists(app)).ToList();
+      config.Applications
+          .Where(app => !IsProtocolUri(app.Path) && !File.Exists(app.Path))
+          .Select(app => app.Path)
+          .ToList();
 
   public string? FindPomodoroOnPath() =>
       FindInPath(pomAssemblyName);
@@ -24,13 +27,18 @@ public class StartCommandController
     return Process.GetProcessesByName(processName).Length > 0;
   }
 
-  public void LaunchApplication(string appPath)
+  public void LaunchApplication(ApplicationConfig app)
   {
-    Process.Start(new ProcessStartInfo
+    var psi = new ProcessStartInfo
     {
-      FileName = appPath,
+      FileName = app.Path,
       UseShellExecute = true
-    });
+    };
+
+    if (!IsProtocolUri(app.Path))
+      psi.WorkingDirectory = app.WorkingDirectory ?? Path.GetDirectoryName(Path.GetFullPath(app.Path));
+
+    Process.Start(psi);
   }
 
   public async Task ResetPomodoro(string pomodoroExe)

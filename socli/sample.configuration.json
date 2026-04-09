@@ -1,4 +1,8 @@
 {
+  "twitch": {
+    "clientId": "",
+    "clientSecret": ""
+  },
   "pomodoro": {
     "taskTime": 25,
     "restTime": 5
@@ -7,11 +11,14 @@
     "pom status"
   ],
   "applications": [
-    "./path/to/exe/app.exe"
+    {
+      "path": "./path/to/exe/app.exe",
+      "workingDirectory": "./path/to/exe"
+    }
   ],
   "activities": [
     {
-      "name": "Programming",
+      "title": "Programming",
       "category": "Software And Game Development",
       "notification": "",
       "tags": [
@@ -31,7 +38,7 @@
       ]
     },
     {
-      "name": "ESO Gaming",
+      "title": "ESO Gaming",
       "category": "Eso Online",
       "notification": "Watch the noob die.",
       "tags": [

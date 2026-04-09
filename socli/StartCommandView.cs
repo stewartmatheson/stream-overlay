@@ -24,10 +24,10 @@ public class StartCommandView
         var activity = AnsiConsole.Prompt(
             new SelectionPrompt<Activity>()
                 .Title("Select a [green]stream activity[/]:")
-                .UseConverter(a => a.Name)
+                .UseConverter(a => a.Title)
                 .AddChoices(activities)
         );
-        ShowSuccess($"Selected: {activity.Name}");
+        ShowSuccess($"Selected: {activity.Title}");
         return activity;
     }
 
@@ -35,16 +35,12 @@ public class StartCommandView
     {
         var tasks = new List<string>(activity.Tasks);
 
-        if (tasks.Count > 0)
-        {
-            ShowExistingTasks(tasks);
-            if (AnsiConsole.Confirm("Add more tasks?", defaultValue: false))
-                tasks.AddRange(PromptForNewTasks());
-        }
-        else if (AnsiConsole.Confirm("Add pomodoro tasks for this session?", defaultValue: true))
-        {
+        if (tasks.Count == 0)
+            return tasks;
+
+        ShowExistingTasks(tasks);
+        if (AnsiConsole.Confirm("Add more tasks?", defaultValue: false))
             tasks.AddRange(PromptForNewTasks());
-        }
 
         return tasks;
     }
@@ -52,10 +48,22 @@ public class StartCommandView
     public bool ConfirmStart() =>
         AnsiConsole.Confirm("Start stream session?");
 
+    public bool ConfirmCategory(string searched, string found)
+    {
+        if (searched.Equals(found, StringComparison.OrdinalIgnoreCase))
+        {
+            ShowSuccess($"  Category matched: {found}");
+            return true;
+        }
+
+        ShowWarning($"  Searched for \"{searched}\" but closest match is \"{found}\"");
+        return AnsiConsole.Confirm($"  Use \"{found}\" as the category?");
+    }
+
     public void ShowSessionSummary(SocliConfig config, Activity activity, List<string> tasks)
     {
         AnsiConsole.Write(new Rule("[yellow]Stream Session[/]"));
-        AnsiConsole.MarkupLine($"[bold]Activity:[/] {activity.Name}");
+        AnsiConsole.MarkupLine($"[bold]Title:[/] {activity.Title}");
         AnsiConsole.MarkupLine($"[bold]Category:[/] {activity.Category}");
 
         if (!string.IsNullOrWhiteSpace(activity.Notification))

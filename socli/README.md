@@ -15,8 +15,53 @@ We will install as a dotnet tool
 
 ## Twitch Authentication
 
-TODO: How to set up Twitch API credentials / OAuth tokens. Where are
-they stored? Environment variables? Config file?
+Socli uses the Twitch Helix API to set your stream title, category, and
+tags. Credentials are stored in Windows Credential Manager.
+
+### Setup
+
+1.  Go to <https://dev.twitch.tv/console> and register a new
+    application.
+
+2.  Set the OAuth redirect URL to `http://localhost:17563`.
+
+3.  Copy the **Client ID** into your `~/.socli.json` under the `twitch`
+    section:
+
+    ``` json
+    {
+      "twitch": {
+        "clientId": "your-client-id-here"
+      }
+    }
+    ```
+
+4.  Run `socli twitch-setup` and paste your **Client Secret** when
+    prompted. This stores it in Windows Credential Manager under
+    `socli:twitch:clientSecret`.
+
+5.  On your first `socli start`, a browser window will open for Twitch
+    OAuth authorization. After you approve, the access and refresh
+    tokens are saved to Credential Manager automatically. Your
+    broadcaster ID is saved to `~/.socli.json`.
+
+### What is stored where
+
+  ---------------------------------------------------------------------
+  Value                       Location
+  --------------------------- -----------------------------------------
+  Client ID                   `~/.socli.json`
+
+  Broadcaster ID              `~/.socli.json`
+
+  Client Secret               Windows Credential Manager
+
+  Access Token                Windows Credential Manager
+
+  Refresh Token               Windows Credential Manager
+  ---------------------------------------------------------------------
+
+Tokens are refreshed automatically when they expire.
 
 ## Configuration
 
@@ -51,34 +96,34 @@ Configuration is stored in a JSON file `~/.socli.json`
   ---------------------------------------------------------------------
   Field                       Required?          Description
   --------------------------- ------------------ ----------------------
-  `name`                      TODO               The name of the
+  `name`                      Yes                The name of the
                                                  activity
 
-  `category`                  TODO               Twitch stream
-                                                 category. TODO: What
-                                                 are valid values? Free
-                                                 text or must match
-                                                 Twitch categories?
+  `category`                  No                 Twitch stream
+                                                 category. Must match a
+                                                 Twitch category name
+                                                 (searched via the
+                                                 Helix API)
 
-  `notification`              TODO               TODO: What does this
+  `notification`              No                 TODO: What does this
                                                  do? Twitch
                                                  notification? Discord?
                                                  What happens if empty
                                                  or omitted?
 
-  `tags`                      TODO               Tags applied to the
+  `tags`                      No                 Tags applied to the
                                                  Twitch stream
 
-  `tasks`                     TODO               Pomodoro timer tasks.
-                                                 TODO: Can this be used
-                                                 with non-programming
-                                                 activities?
+  `tasks`                     No                 Pomodoro timer tasks
   ---------------------------------------------------------------------
 
 ### Example
 
 ``` json
 {
+  "twitch": {
+    "clientId": "abc123"
+  },
   "pomodoro": {
     "taskTime": 25,
     "restTime": 5
@@ -138,14 +183,28 @@ Configuration is stored in a JSON file `~/.socli.json`
 Starts a single stream session based on a configured activity. This
 will:
 
-- [ ] Prompt for a stream activity (if programming, ask the user to
+- [x] Prompt for a stream activity (if programming, ask the user to
   define tasks for the pomodoro timer)
-- [ ] Set the stream title, tags, and notification on Twitch
-- [ ] Start list of applications
-- [ ] Start pomodoro timer with provided tasks if not gaming
+- [x] Set the stream title, tags, and category on Twitch
+- [x] Start list of applications
+- [x] Start pomodoro timer with provided tasks if not gaming
 
 Before running each step we will validate the following
 
 - All of the paths to the applications exist
 - The configuration JSON is valid
-- Do a health check on twitch might just slow things down
+
+### Twitch Setup
+
+    socli twitch-setup
+
+Prompts for your Twitch client secret and stores it in Windows
+Credential Manager.
+
+## Installation
+
+Publish a self-contained exe and install it to `~/.local/bin`:
+
+``` bash
+dotnet publish .\socli.csproj -c Release -r win-x64 --self-contained -o ../install/socli
+```

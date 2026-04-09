@@ -12,10 +12,16 @@ public class SocliConfig
   public List<string> Prelaunch { get; set; } = [];
 
   [JsonPropertyName("applications")]
-  public List<string> Applications { get; set; } = [];
+  public List<ApplicationConfig> Applications { get; set; } = [];
 
   [JsonPropertyName("activities")]
   public List<Activity> Activities { get; set; } = [];
+
+  [JsonPropertyName("twitch")]
+  public TwitchConfig Twitch { get; set; } = new();
+
+  [JsonIgnore]
+  public string FilePath { get; private set; } = DefaultPath;
 
   public static string DefaultPath =>
       Path.Combine(
@@ -31,8 +37,17 @@ public class SocliConfig
       throw new FileNotFoundException($"Configuration file not found: {path}");
 
     var json = File.ReadAllText(path);
-    return JsonSerializer.Deserialize<SocliConfig>(json)
+    var config = JsonSerializer.Deserialize<SocliConfig>(json)
         ?? throw new InvalidOperationException("Failed to deserialize configuration.");
+    config.FilePath = path;
+    return config;
+  }
+
+  public void Save(string? path = null)
+  {
+    path ??= FilePath;
+    var options = new JsonSerializerOptions { WriteIndented = true };
+    File.WriteAllText(path, JsonSerializer.Serialize(this, options));
   }
 }
 
@@ -47,8 +62,8 @@ public class PomodoroConfig
 
 public class Activity
 {
-  [JsonPropertyName("name")]
-  public string Name { get; set; } = "";
+  [JsonPropertyName("title")]
+  public string Title { get; set; } = "";
 
   [JsonPropertyName("category")]
   public string Category { get; set; } = "";
@@ -64,4 +79,22 @@ public class Activity
 
   [JsonPropertyName("checklist")]
   public List<string> Checklist { get; set; } = [];
+}
+
+public class ApplicationConfig
+{
+  [JsonPropertyName("path")]
+  public string Path { get; set; } = "";
+
+  [JsonPropertyName("workingDirectory")]
+  public string? WorkingDirectory { get; set; }
+}
+
+public class TwitchConfig
+{
+  [JsonPropertyName("clientId")]
+  public string ClientId { get; set; } = "";
+
+  [JsonPropertyName("broadcasterId")]
+  public string BroadcasterId { get; set; } = "";
 }
