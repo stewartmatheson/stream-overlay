@@ -35,7 +35,7 @@ Commands are sent as newline-terminated strings to TCP port `7777`.
 
 ### Mode: BottomPopup
 
-#### `bottompopup Title|Body[|BorderColor][|BgColor]`
+#### `bottompopup Title|Body[||BgColor][|TopBorderThickness][|TopBorderColor]`
 
 Displays a popup that slides in from the bottom of the screen. Fields
 are pipe-delimited. Colors are optional and default to the Tokyo Night
@@ -43,12 +43,13 @@ theme. Display duration scales automatically based on word count
 (configurable, default 150 WPM) so longer messages stay on screen
 longer. A minimum display time of 3 seconds is enforced.
 
-  Parameter       Type     Description
-  --------------- -------- -----------------------------------
-  `Title`         string   Popup heading text
-  `Body`          string   Popup body text (supports BBCode)
-  `BorderColor`   string   Optional border color
-  `BgColor`       string   Optional background color
+  Parameter              Type     Description
+  ---------------------- -------- -------------------------------------------
+  `Title`                string   Popup heading text
+  `Body`                 string   Popup body text (supports BBCode)
+  `BgColor`              string   Optional background color (`R,G,B` 0-255)
+  `TopBorderThickness`   int      Optional top border thickness in pixels
+  `TopBorderColor`       string   Optional top border color (hex `#RRGGBB`)
 
 **Helper script** --- `scripts/send-bottompopup.ps1` (PowerShell):
 
@@ -59,8 +60,11 @@ longer. A minimum display time of 3 seconds is enforced.
 # Custom title and body
 .\scripts\send-bottompopup.ps1 -Title "Welcome!" -Body "Enjoy the stream"
 
-# With optional colors
-.\scripts\send-bottompopup.ps1 -Title "Hey" -Body "Nice to see you" -BorderColor "255,0,0" -BgColor "26,27,38"
+# With background color
+.\scripts\send-bottompopup.ps1 -Title "Hey" -Body "Nice to see you" -BgColor "26,27,38"
+
+# With a top border (4px, purple)
+.\scripts\send-bottompopup.ps1 -Title "Hey" -Body "Nice to see you" -TopBorderThickness 4 -TopBorderColor "#BB9AF7"
 
 # Custom port
 .\scripts\send-bottompopup.ps1 -Title "Hi" -Body "Test" -Port 9999

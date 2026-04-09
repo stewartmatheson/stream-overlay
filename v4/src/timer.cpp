@@ -84,5 +84,5 @@ void Timer::render(Renderer& r) {
 
     // Size the rect generously from the given position
     D2D1_RECT_F rect = { x_, y_, x_ + 600.f, y_ + 40.f };
-    r.draw_text_bold(std::wstring_view(buf), rect, colors::fg);
+    r.draw_text_bold(std::wstring_view(buf), rect, scheme_.fg);
 }

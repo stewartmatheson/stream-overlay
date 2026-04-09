@@ -58,6 +58,21 @@ D2D1_COLOR_F BottomPopup::parse_color(std::string_view s, D2D1_COLOR_F fallback)
     return {rgb[0], rgb[1], rgb[2], fallback.a};
 }
 
+D2D1_COLOR_F BottomPopup::parse_hex_color(std::string_view s, D2D1_COLOR_F fallback) {
+    // Expected: "#RRGGBB" or "RRGGBB"
+    if (!s.empty() && s[0] == '#') s.remove_prefix(1);
+    if (s.size() != 6) return fallback;
+    unsigned int hex = 0;
+    auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), hex, 16);
+    if (ec != std::errc()) return fallback;
+    return {
+        ((hex >> 16) & 0xFF) / 255.f,
+        ((hex >> 8)  & 0xFF) / 255.f,
+        ( hex        & 0xFF) / 255.f,
+        1.f
+    };
+}
+
 bool BottomPopup::on_command(std::string_view command, std::string_view args) {
     if (command != "bottompopup") return false;
 
@@ -74,12 +89,21 @@ bool BottomPopup::on_command(std::string_view command, std::string_view args) {
     if (fields.size() < 2) return false;
 
     Popup p;
+    p.bg_color = scheme_.bg;
+    p.top_border_color = scheme_.title;
     p.title = to_wide(fields[0]);
     auto parsed = parse_bbcode(to_wide(fields[1]));
     p.body       = std::move(parsed.text);
     p.body_spans = std::move(parsed.spans);
-    if (fields.size() >= 3) p.border_color = parse_color(fields[2], colors::accent);
-    if (fields.size() >= 4) p.bg_color     = parse_color(fields[3], colors::bg);
+    if (fields.size() >= 3) { /* field 3 reserved (formerly BorderColor) */ }
+    if (fields.size() >= 4) p.bg_color     = parse_color(fields[3], scheme_.bg);
+    if (fields.size() >= 5) {
+        int px = 0;
+        auto part = fields[4];
+        std::from_chars(part.data(), part.data() + part.size(), px);
+        p.top_border_thickness = static_cast<float>(std::clamp(px, 0, 100));
+    }
+    if (fields.size() >= 6) p.top_border_color = parse_hex_color(fields[5], scheme_.accent);
     p.display_time = compute_display_time(fields[0], fields[1]);
 
     if (state_ == State::Idle) {
@@ -153,11 +177,19 @@ void BottomPopup::render(Renderer& r) {
         popup_bottom + offset_y
     };
 
-    r.draw_rounded_rect(rect, current_.bg_color, current_.border_color, 0.f);
+    r.draw_rounded_rect(rect, current_.bg_color, current_.bg_color, 0.f, 0.f);
+
+    if (current_.top_border_thickness > 0.f) {
+        D2D1_RECT_F top_border = {
+            rect.left, rect.top,
+            rect.right, rect.top + current_.top_border_thickness
+        };
+        r.draw_rounded_rect(top_border, current_.top_border_color, current_.top_border_color, 0.f, 0.f);
+    }
 
     D2D1_RECT_F title_rect = {rect.left + kPad, rect.top + kPad, rect.right - kPad, rect.top + kPad + kTitleHeight};
     D2D1_RECT_F body_rect  = {rect.left + kPad, rect.top + kPad + kTitleHeight + kTitleBodyGap, rect.right - kPad, rect.bottom - kPad};
 
-    r.draw_text(current_.title, title_rect, colors::title, true);
-    r.draw_rich_text(current_.body, current_.body_spans, body_rect, colors::fg, false);
+    r.draw_text(current_.title, title_rect, scheme_.title, true);
+    r.draw_rich_text(current_.body, current_.body_spans, body_rect, scheme_.fg, false);
 }

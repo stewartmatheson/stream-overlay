@@ -8,13 +8,18 @@ public class CPHInline
     {
         string title = args.ContainsKey("title") ? args["title"].ToString() : "Hello";
         string body = args.ContainsKey("body") ? args["body"].ToString() : "";
-        string borderColor = args.ContainsKey("borderColor") ? args["borderColor"].ToString() : "";
         string bgColor = args.ContainsKey("bgColor") ? args["bgColor"].ToString() : "";
+        string topBorderThickness = args.ContainsKey("topBorderThickness") ? args["topBorderThickness"].ToString() : "0";
+        string topBorderColor = args.ContainsKey("topBorderColor") ? args["topBorderColor"].ToString() : "";
         int port = args.ContainsKey("port") ? int.Parse(args["port"].ToString()) : 7777;
 
-        string msg = $"bottompopup {title}|{body}";
-        if (!string.IsNullOrEmpty(borderColor)) msg += $"|{borderColor}";
-        if (!string.IsNullOrEmpty(bgColor)) msg += $"|{bgColor}";
+        string msg = $"bottompopup {title}|{body}||";
+        if (!string.IsNullOrEmpty(bgColor)) msg += bgColor;
+        int thickness = int.TryParse(topBorderThickness, out var t) ? t : 0;
+        if (thickness > 0) {
+            msg += $"|{thickness}";
+            if (!string.IsNullOrEmpty(topBorderColor)) msg += $"|{topBorderColor}";
+        }
 
         try
         {
