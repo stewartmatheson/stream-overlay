@@ -20,6 +20,10 @@ else if (args.Length > 0 && args[0] == "status")
   var response = await SendCommandWithResponse("STATUS");
   Console.Write(response);
 }
+else if (args.Length > 0 && args[0] == "reset")
+{
+  await SendCommand("RESET");
+}
 else
 {
   await RunClient();
@@ -89,25 +93,35 @@ async Task RunServer()
       var reader = new StreamReader(client.GetStream(), Encoding.UTF8, leaveOpen: true);
       var message = await reader.ReadToEndAsync(appCts.Token);
 
-      HandleMessage(message, client, scheduler, appCts.Token);
+      HandleMessage(message, client, scheduler, overlayEventHandler, appCts.Token);
     }
   }
 
   scheduler.Stop();
+  overlayEventHandler.ClearTimer();
   listener.Stop();
   Console.WriteLine("Shutting down.");
 }
 
-void HandleMessage(string message, TcpClient client, PomodoroScheduler scheduler, CancellationToken token)
+void HandleMessage(string message, TcpClient client, PomodoroScheduler scheduler, OverlayEventHandler overlayEventHandler, CancellationToken token)
 {
   if (message.StartsWith("STATUS"))
     HandleStatus(client, scheduler);
   else if (message.StartsWith("ADD:"))
     HandleAdd(message.Substring(4).Trim(), scheduler, token);
+  else if (message.StartsWith("RESET"))
+    HandleReset(scheduler, overlayEventHandler);
   else if (message.StartsWith("SCHEDULE:"))
     HandleSchedule(message, scheduler, token);
   else
     throw new Exception("Unknown Command");
+}
+
+void HandleReset(PomodoroScheduler scheduler, OverlayEventHandler overlayEventHandler)
+{
+  scheduler.Reset();
+  overlayEventHandler.ClearTimer();
+  Console.WriteLine("Reset: all tasks cleared.");
 }
 
 void HandleStatus(TcpClient client, PomodoroScheduler scheduler)

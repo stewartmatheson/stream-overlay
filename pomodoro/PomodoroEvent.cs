@@ -71,7 +71,8 @@ public class EventMessageBodyBuilder
 
   private static string TimeRemaining(PomodoroEventArgs e)
   {
-    return $"[[color=e0af68][b]⏰ {e.TimeRemaining}[/b][/color]]";
+    var hexColor = "8f5815";
+    return $"[[color={hexColor}][b]⏰ {e.TimeRemaining}[/b][/color]]";
   }
 }
 
@@ -153,4 +154,8 @@ public class OverlayEventHandler : IPomodoroEventHandler
     SendBottomPopupMessage(EventTitleBuilder.IntervalTitle(e), EventMessageBodyBuilder.WorkSummary(e));
   }
 
+  public void ClearTimer()
+  {
+    SendTcp("timer_clear");
+  }
 }

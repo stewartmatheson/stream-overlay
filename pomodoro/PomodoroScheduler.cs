@@ -61,6 +61,16 @@ public class PomodoroScheduler
     }
   }
 
+  public void Reset()
+  {
+    Stop();
+    lock (_lock)
+    {
+      _blocks.Clear();
+      _currentIndex = -1;
+    }
+  }
+
   public string GetStatus()
   {
     lock (_lock)
