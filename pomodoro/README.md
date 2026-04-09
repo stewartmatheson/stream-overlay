@@ -98,7 +98,7 @@ dotnet run -- server
 Publish a self-contained exe and install it to `~/.local/bin`:
 
 ``` bash
-dotnet publish -c Release -r win-x64 --self-contained -o ~/.local/bin
+dotnet publish .\Pomodoro.csproj -c Release -r win-x64 --self-contained -o ~/.local/bin
 ```
 
 ## Commands
