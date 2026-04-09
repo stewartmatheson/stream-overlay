@@ -2,7 +2,7 @@ namespace Socli;
 
 public static class StartCommand
 {
-  public static async Task<int> RunAsync(bool debug = false)
+  public static async Task<int> RunAsync()
   {
     var view = new StartCommandView();
     var controller = new StartCommandController();
@@ -32,7 +32,7 @@ public static class StartCommand
     LaunchAllApplications(controller, view, config);
 
     if (tasks.Count > 0)
-      await RunPomodoro(controller, view, pomodoroExe, config.Pomodoro, tasks, debug);
+      await RunPomodoro(controller, view, pomodoroExe, tasks);
 
     view.ShowSuccess("Stream session started!");
     return 0;
@@ -73,6 +73,12 @@ public static class StartCommand
     view.ShowInfo("Launching applications...");
     foreach (var appPath in config.Applications)
     {
+      if (controller.IsApplicationRunning(appPath))
+      {
+        view.ShowWarning($"  Already running: {appPath}");
+        continue;
+      }
+
       controller.LaunchApplication(appPath);
       view.ShowSuccess($"  Started: {appPath}");
     }
@@ -80,22 +86,12 @@ public static class StartCommand
 
   private static async Task RunPomodoro(
       StartCommandController controller, StartCommandView view,
-      string pomodoroExe, PomodoroConfig pom, List<string> tasks, bool debug)
+      string pomodoroExe, List<string> tasks)
   {
-    if (controller.IsPomodoroRunning())
-    {
-      view.ShowWarning("Pomodoro is already running, skipping.");
-      return;
-    }
+    view.ShowInfo("Resetting pomodoro...");
+    await controller.ResetPomodoro(pomodoroExe);
 
-    view.ShowInfo("Starting pomodoro timer...");
-
-    if (debug)
-    {
-      var json = StartCommandController.BuildScheduleJson(pom, tasks);
-      view.ShowDebugJson(json);
-    }
-
-    await controller.StartPomodoro(pomodoroExe, pom, tasks);
+    view.ShowInfo("Adding pomodoro tasks...");
+    await controller.StartPomodoro(pomodoroExe, tasks);
   }
 }

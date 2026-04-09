@@ -1,16 +1,28 @@
 using System.Diagnostics;
-using System.Text.Json;
 
 namespace Socli;
 
 public class StartCommandController
 {
+  private static string pomAssemblyName = "pom";
+
+  public static bool IsProtocolUri(string app) =>
+      Uri.TryCreate(app, UriKind.Absolute, out var uri) && uri.Scheme != "file";
 
   public List<string> FindMissingApplications(SocliConfig config) =>
-      config.Applications.Where(app => !File.Exists(app)).ToList();
+      config.Applications.Where(app => !IsProtocolUri(app) && !File.Exists(app)).ToList();
 
   public string? FindPomodoroOnPath() =>
-      FindInPath("pomodoro");
+      FindInPath(pomAssemblyName);
+
+  public bool IsApplicationRunning(string appPath)
+  {
+    if (IsProtocolUri(appPath))
+      return false;
+
+    var processName = Path.GetFileNameWithoutExtension(appPath);
+    return Process.GetProcessesByName(processName).Length > 0;
+  }
 
   public void LaunchApplication(string appPath)
   {
@@ -21,44 +33,37 @@ public class StartCommandController
     });
   }
 
-  public bool IsPomodoroRunning()
+  public async Task ResetPomodoro(string pomodoroExe)
   {
-    var processes = Process.GetProcessesByName("pomodoro");
-    return processes.Length > 0;
-  }
-
-  public async Task StartPomodoro(string pomodoroExe, PomodoroConfig pom, List<string> tasks)
-  {
-    var json = BuildScheduleJson(pom, tasks);
-
     var psi = new ProcessStartInfo
     {
       FileName = pomodoroExe,
-      RedirectStandardInput = true,
+      Arguments = "reset",
       UseShellExecute = false
     };
 
     using var process = Process.Start(psi)
         ?? throw new InvalidOperationException("Failed to start pomodoro process.");
 
-    await process.StandardInput.WriteAsync(json);
-    process.StandardInput.Close();
     await process.WaitForExitAsync();
   }
 
-  public static string BuildScheduleJson(PomodoroConfig pom, List<string> tasks)
+  public async Task StartPomodoro(string pomodoroExe, List<string> tasks)
   {
-    var schedule = new
+    foreach (var task in tasks)
     {
-      timeBlocks = tasks.Select(t => new
+      var psi = new ProcessStartInfo
       {
-        workDuration = pom.TaskTime,
-        restDuration = pom.RestTime,
-        task = new { name = t, description = t }
-      }).ToArray()
-    };
+        FileName = pomodoroExe,
+        Arguments = $"add \"{task}\"",
+        UseShellExecute = false
+      };
 
-    return JsonSerializer.Serialize(schedule, new JsonSerializerOptions { WriteIndented = true });
+      using var process = Process.Start(psi)
+          ?? throw new InvalidOperationException("Failed to start pomodoro process.");
+
+      await process.WaitForExitAsync();
+    }
   }
 
   private static string? FindInPath(string executable)

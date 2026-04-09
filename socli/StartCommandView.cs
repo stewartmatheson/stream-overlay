@@ -19,13 +19,6 @@ public class StartCommandView
     public void ShowWarning(string message) =>
         AnsiConsole.MarkupLine($"[yellow]{message}[/]");
 
-    public void ShowDebugJson(string json)
-    {
-        AnsiConsole.Write(new Rule("[yellow]Debug: Pomodoro JSON[/]"));
-        AnsiConsole.WriteLine(json);
-        AnsiConsole.Write(new Rule());
-    }
-
     public Activity PromptForActivity(List<Activity> activities)
     {
         var activity = AnsiConsole.Prompt(
