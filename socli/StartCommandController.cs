@@ -74,21 +74,20 @@ public class StartCommandController
     }
   }
 
-  public async Task<(bool success, string command, int exitCode)> RunPrelaunchCommand(string command)
+  public async Task<int> CheckPomodoroStatus(string pomodoroExe)
   {
-    var parts = command.Split(' ', 2);
     var psi = new ProcessStartInfo
     {
-      FileName = parts[0],
-      Arguments = parts.Length > 1 ? parts[1] : "",
+      FileName = pomodoroExe,
+      Arguments = "status",
       UseShellExecute = false
     };
 
     using var process = Process.Start(psi)
-        ?? throw new InvalidOperationException($"Failed to start prelaunch command: {command}");
+        ?? throw new InvalidOperationException("Failed to start pomodoro status check.");
 
     await process.WaitForExitAsync();
-    return (process.ExitCode == 0, command, process.ExitCode);
+    return process.ExitCode;
   }
 
   private static string? FindInPath(string executable)

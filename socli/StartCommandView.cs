@@ -31,18 +31,12 @@ public class StartCommandView
         return activity;
     }
 
-    public List<string> GatherTasks(Activity activity)
+    public List<string> PromptForFirstTask()
     {
-        var tasks = new List<string>(activity.Tasks);
-
-        if (tasks.Count == 0)
-            return tasks;
-
-        ShowExistingTasks(tasks);
-        if (AnsiConsole.Confirm("Add more tasks?", defaultValue: false))
-            tasks.AddRange(PromptForNewTasks());
-
-        return tasks;
+        var task = AnsiConsole.Prompt(
+            new TextPrompt<string>("[blue]Enter your first pomodoro task:[/]")
+        );
+        return [task];
     }
 
     public bool ConfirmStart() =>
@@ -60,7 +54,7 @@ public class StartCommandView
         return AnsiConsole.Confirm($"  Use \"{found}\" as the category?");
     }
 
-    public void ShowSessionSummary(SocliConfig config, Activity activity, List<string> tasks)
+    public void ShowSessionSummary(SocliConfig config, Activity activity)
     {
         AnsiConsole.Write(new Rule("[yellow]Stream Session[/]"));
         AnsiConsole.MarkupLine($"[bold]Title:[/] {activity.Title}");
@@ -70,11 +64,8 @@ public class StartCommandView
             AnsiConsole.MarkupLine($"[bold]Notification:[/] {activity.Notification}");
         if (activity.Tags.Count > 0)
             AnsiConsole.MarkupLine($"[bold]Tags:[/] {string.Join(", ", activity.Tags)}");
-        if (tasks.Count > 0)
-        {
+        if (activity.UsePomodoro)
             AnsiConsole.MarkupLine($"[bold]Pomodoro:[/] {config.Pomodoro.TaskTime}m work / {config.Pomodoro.RestTime}m rest");
-            AnsiConsole.MarkupLine($"[bold]Tasks:[/] {tasks.Count}");
-        }
 
         AnsiConsole.Write(new Rule());
     }
@@ -93,25 +84,4 @@ public class StartCommandView
         AnsiConsole.Write(new Rule());
     }
 
-    private void ShowExistingTasks(List<string> tasks)
-    {
-        ShowInfo("Pomodoro tasks from config:");
-        foreach (var task in tasks)
-            AnsiConsole.MarkupLine($"  - {task}");
-    }
-
-    private static List<string> PromptForNewTasks()
-    {
-        var tasks = new List<string>();
-        AnsiConsole.MarkupLine("[grey]Enter tasks one per line. Empty line to finish.[/]");
-
-        while (true)
-        {
-            var input = AnsiConsole.Prompt(new TextPrompt<string>("[blue]Task:[/]").AllowEmpty());
-            if (string.IsNullOrWhiteSpace(input)) break;
-            tasks.Add(input);
-        }
-
-        return tasks;
-    }
 }

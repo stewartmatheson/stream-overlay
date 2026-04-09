@@ -8,9 +8,6 @@ public class SocliConfig
   [JsonPropertyName("pomodoro")]
   public PomodoroConfig Pomodoro { get; set; } = new();
 
-  [JsonPropertyName("prelaunch")]
-  public List<string> Prelaunch { get; set; } = [];
-
   [JsonPropertyName("applications")]
   public List<ApplicationConfig> Applications { get; set; } = [];
 
@@ -74,8 +71,8 @@ public class Activity
   [JsonPropertyName("tags")]
   public List<string> Tags { get; set; } = [];
 
-  [JsonPropertyName("tasks")]
-  public List<string> Tasks { get; set; } = [];
+  [JsonPropertyName("usePomodoro")]
+  public bool UsePomodoro { get; set; }
 
   [JsonPropertyName("checklist")]
   public List<string> Checklist { get; set; } = [];

@@ -7,9 +7,6 @@
     "taskTime": 25,
     "restTime": 5
   },
-  "prelaunch": [
-    "pom status"
-  ],
   "applications": [
     {
       "path": "./path/to/exe/app.exe",
@@ -27,10 +24,7 @@
         "whatever",
         "whatever else"
       ],
-      "tasks": [
-        "Building the pomodoro JSON with a cli",
-        "Making the Pom timer display better messages"
-      ],
+      "usePomodoro": true,
       "checklist": [
         "Is HDR off?",
         "Make sure obs is running",
@@ -46,6 +40,7 @@
         "noob streamer",
         "backseating allowed"
       ],
+      "usePomodoro": false,
       "checklist": [
         "Is HDR on?",
         "Make sure obs is running",

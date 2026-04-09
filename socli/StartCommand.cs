@@ -12,14 +12,12 @@ public static class StartCommand
     if (!ValidatePrerequisites(controller, view, config, out var pomodoroExe))
       return 1;
 
-    if (!await RunPrelaunchChecks(controller, view, config))
-      return 1;
-
     var activity = view.PromptForActivity(config.Activities);
 
-    var tasks = view.GatherTasks(activity);
+    if (activity.UsePomodoro && !await CheckPomodoroStatus(controller, view, pomodoroExe))
+      return 1;
 
-    view.ShowSessionSummary(config, activity, tasks);
+    view.ShowSessionSummary(config, activity);
 
     if (!view.ConfirmStart())
     {
@@ -35,8 +33,8 @@ public static class StartCommand
     if (activity.Checklist.Count > 0)
       view.RunChecklist(activity.Checklist);
 
-    if (tasks.Count > 0)
-      await RunPomodoro(controller, view, pomodoroExe, tasks);
+    if (activity.UsePomodoro)
+      await RunPomodoro(controller, view, pomodoroExe, view.PromptForFirstTask());
 
     view.ShowSuccess("Stream session started!");
     return 0;
@@ -98,22 +96,17 @@ public static class StartCommand
     return true;
   }
 
-  private static async Task<bool> RunPrelaunchChecks(
-      StartCommandController controller, StartCommandView view, SocliConfig config)
+  private static async Task<bool> CheckPomodoroStatus(
+      StartCommandController controller, StartCommandView view, string pomodoroExe)
   {
-    if (config.Prelaunch.Count == 0) return true;
-
-    view.ShowInfo("Running prelaunch checks...");
-    foreach (var command in config.Prelaunch)
+    view.ShowInfo("Checking pomodoro status...");
+    var exitCode = await controller.CheckPomodoroStatus(pomodoroExe);
+    if (exitCode != 0)
     {
-      var (success, cmd, exitCode) = await controller.RunPrelaunchCommand(command);
-      if (!success)
-      {
-        view.ShowError($"Prelaunch command failed: {cmd} (exit code {exitCode})");
-        return false;
-      }
-      view.ShowSuccess($"  Passed: {cmd}");
+      view.ShowError($"Pomodoro status check failed (exit code {exitCode}).");
+      return false;
     }
+    view.ShowSuccess("  Pomodoro status OK");
     return true;
   }
 
