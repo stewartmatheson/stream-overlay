@@ -74,6 +74,9 @@ public class Activity
   [JsonPropertyName("usePomodoro")]
   public bool UsePomodoro { get; set; }
 
+  [JsonPropertyName("applications")]
+  public List<ApplicationConfig> Applications { get; set; } = [];
+
   [JsonPropertyName("checklist")]
   public List<string> Checklist { get; set; } = [];
 }

@@ -9,8 +9,8 @@ public class StartCommandController
   public static bool IsProtocolUri(string app) =>
       Uri.TryCreate(app, UriKind.Absolute, out var uri) && uri.Scheme != "file";
 
-  public List<string> FindMissingApplications(SocliConfig config) =>
-      config.Applications
+  public List<string> FindMissingApplications(IEnumerable<ApplicationConfig> applications) =>
+      applications
           .Where(app => !IsProtocolUri(app.Path) && !File.Exists(app.Path))
           .Select(app => app.Path)
           .ToList();

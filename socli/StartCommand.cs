@@ -9,10 +9,13 @@ public static class StartCommand
 
     var config = SocliConfig.Load();
 
-    if (!ValidatePrerequisites(controller, view, config, out var pomodoroExe))
+    if (!ValidatePomodoroOnPath(controller, view, out var pomodoroExe))
       return 1;
 
     var activity = view.PromptForActivity(config.Activities);
+
+    if (!ValidateApplications(controller, view, config, activity))
+      return 1;
 
     if (activity.UsePomodoro && !await CheckPomodoroStatus(controller, view, pomodoroExe))
       return 1;
@@ -28,7 +31,7 @@ public static class StartCommand
     if (!await UpdateTwitch(view, config, activity))
       return 1;
 
-    LaunchAllApplications(controller, view, config);
+    LaunchAllApplications(controller, view, config.Applications.Concat(activity.Applications));
 
     if (activity.Checklist.Count > 0)
       view.RunChecklist(activity.Checklist);
@@ -110,20 +113,10 @@ public static class StartCommand
     return true;
   }
 
-  private static bool ValidatePrerequisites(
-      StartCommandController controller, StartCommandView view,
-      SocliConfig config, out string pomodoroExe)
+  private static bool ValidatePomodoroOnPath(
+      StartCommandController controller, StartCommandView view, out string pomodoroExe)
   {
     pomodoroExe = "";
-
-    var missing = controller.FindMissingApplications(config);
-    if (missing.Count > 0)
-    {
-      view.ShowError("The following application paths do not exist:");
-      foreach (var app in missing)
-        view.ShowError($"  - {app}");
-      return false;
-    }
 
     var exe = controller.FindPomodoroOnPath();
     if (exe is null)
@@ -137,13 +130,31 @@ public static class StartCommand
     return true;
   }
 
-  private static void LaunchAllApplications(
-      StartCommandController controller, StartCommandView view, SocliConfig config)
+  private static bool ValidateApplications(
+      StartCommandController controller, StartCommandView view,
+      SocliConfig config, Activity activity)
   {
-    if (config.Applications.Count == 0) return;
+    var missing = controller.FindMissingApplications(
+        config.Applications.Concat(activity.Applications));
+    if (missing.Count > 0)
+    {
+      view.ShowError("The following application paths do not exist:");
+      foreach (var app in missing)
+        view.ShowError($"  - {app}");
+      return false;
+    }
+    return true;
+  }
+
+  private static void LaunchAllApplications(
+      StartCommandController controller, StartCommandView view,
+      IEnumerable<ApplicationConfig> applications)
+  {
+    var apps = applications.ToList();
+    if (apps.Count == 0) return;
 
     view.ShowInfo("Launching applications...");
-    foreach (var app in config.Applications)
+    foreach (var app in apps)
     {
       if (controller.IsApplicationRunning(app.Path))
       {

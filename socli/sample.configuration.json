@@ -25,6 +25,12 @@
         "whatever else"
       ],
       "usePomodoro": true,
+      "applications": [
+        {
+          "path": "./path/to/editor.exe",
+          "workingDirectory": "./path/to/editor"
+        }
+      ],
       "checklist": [
         "Is HDR off?",
         "Make sure obs is running",
