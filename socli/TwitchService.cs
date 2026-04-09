@@ -143,17 +143,40 @@ public class TwitchService : IDisposable
     return result?.Data?.FirstOrDefault()?.Id;
   }
 
-  public async Task<TwitchCategory?> SearchCategoryAsync(string name)
+  public async Task<SearchCategoryResult> SearchCategoryAsync(string name)
   {
-    var response = await _http.GetAsync(
-        $"{ApiBase}/search/categories?query={Uri.EscapeDataString(name)}");
+    var response = await SendCategorySearch(name);
 
-    if (!response.IsSuccessStatusCode) return null;
+    if (response.StatusCode == HttpStatusCode.Unauthorized && await RefreshTokenAsync())
+      response = await SendCategorySearch(name);
+
+    if (response.StatusCode == HttpStatusCode.Unauthorized)
+    {
+      var body = await response.Content.ReadAsStringAsync();
+      return SearchCategoryResult.Fail(response.StatusCode,
+          "Twitch API returned 401 Unauthorized. Your access token is missing, expired, or lacks the required scopes. "
+          + "Re-run `socli twitch-setup` to re-authenticate."
+          + (string.IsNullOrWhiteSpace(body) ? "" : $" Details: {body}"));
+    }
+
+    if (!response.IsSuccessStatusCode)
+    {
+      var body = await response.Content.ReadAsStringAsync();
+      return SearchCategoryResult.Fail(response.StatusCode,
+          $"Twitch category search failed ({(int)response.StatusCode} {response.StatusCode}). {body}");
+    }
 
     var result = await response.Content.ReadFromJsonAsync<TwitchData<TwitchCategory>>();
     var exact = result?.Data?.FirstOrDefault(c =>
         c.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-    return exact ?? result?.Data?.FirstOrDefault();
+    var category = exact ?? result?.Data?.FirstOrDefault();
+    return SearchCategoryResult.Ok(category, response.StatusCode);
+  }
+
+  private async Task<HttpResponseMessage> SendCategorySearch(string name)
+  {
+    return await _http.GetAsync(
+        $"{ApiBase}/search/categories?query={Uri.EscapeDataString(name)}");
   }
 
   public async Task<UpdateChannelResult> UpdateChannelAsync(string title, string gameId, List<string> tags)
@@ -200,6 +223,16 @@ public class TwitchService : IDisposable
 }
 
 public record UpdateChannelResult(bool Success, HttpStatusCode? StatusCode, string? Error);
+
+public record SearchCategoryResult(
+    bool Success, TwitchCategory? Category, HttpStatusCode? StatusCode, string? Error)
+{
+  public static SearchCategoryResult Ok(TwitchCategory? category, HttpStatusCode statusCode) =>
+      new(true, category, statusCode, null);
+
+  public static SearchCategoryResult Fail(HttpStatusCode? statusCode, string error) =>
+      new(false, null, statusCode, error);
+}
 
 public class TokenResponse
 {

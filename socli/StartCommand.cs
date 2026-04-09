@@ -77,7 +77,16 @@ public static class StartCommand
 
     view.ShowInfo("Updating Twitch channel...");
 
-    var category = await twitch.SearchCategoryAsync(activity.Category)
+    var categoryResult = await twitch.SearchCategoryAsync(activity.Category);
+    if (!categoryResult.Success)
+    {
+      view.ShowError($"  Failed to search Twitch categories ({categoryResult.StatusCode}).");
+      if (!string.IsNullOrWhiteSpace(categoryResult.Error))
+        view.ShowError($"  {categoryResult.Error}");
+      return false;
+    }
+
+    var category = categoryResult.Category
       ?? throw new InvalidOperationException($"Could not find Twitch category: {activity.Category}");
 
     if (!view.ConfirmCategory(activity.Category, category.Name))
