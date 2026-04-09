@@ -12,6 +12,9 @@ public static class StartCommand
     if (!ValidatePrerequisites(controller, view, config, out var pomodoroExe))
       return 1;
 
+    if (!await RunPrelaunchChecks(controller, view, config))
+      return 1;
+
     var activity = view.PromptForActivity(config.Activities);
 
     if (activity.Checklist.Count > 0)
@@ -36,6 +39,25 @@ public static class StartCommand
 
     view.ShowSuccess("Stream session started!");
     return 0;
+  }
+
+  private static async Task<bool> RunPrelaunchChecks(
+      StartCommandController controller, StartCommandView view, SocliConfig config)
+  {
+    if (config.Prelaunch.Count == 0) return true;
+
+    view.ShowInfo("Running prelaunch checks...");
+    foreach (var command in config.Prelaunch)
+    {
+      var (success, cmd, exitCode) = await controller.RunPrelaunchCommand(command);
+      if (!success)
+      {
+        view.ShowError($"Prelaunch command failed: {cmd} (exit code {exitCode})");
+        return false;
+      }
+      view.ShowSuccess($"  Passed: {cmd}");
+    }
+    return true;
   }
 
   private static bool ValidatePrerequisites(

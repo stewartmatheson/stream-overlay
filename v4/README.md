@@ -78,11 +78,11 @@ Displays a countdown timer at the given pixel position. If a timer is
 already running it is replaced. The timer auto-hides when it reaches
 zero. Fields are pipe-delimited.
 
-  Parameter       Type     Description
-  --------------- -------- -----------------------------------
-  `Label`         string   Text shown before the time
-  `MM:SS`         string   Initial countdown duration
-  `X,Y`           string   Screen position in pixels
+  Parameter   Type     Description
+  ----------- -------- ----------------------------
+  `Label`     string   Text shown before the time
+  `MM:SS`     string   Initial countdown duration
+  `X,Y`       string   Screen position in pixels
 
 Example:
 
@@ -138,6 +138,26 @@ cmake -B build/vs -G "Visual Studio 17 2022" -A x64
 ```
 
 Then open `build/vs/stream-overlay.sln` in Visual Studio.
+
+## Install
+
+After building, install the executable to a folder of your choice using
+`CMAKE_INSTALL_PREFIX`:
+
+``` bash
+cmake --install build/ninja --prefix "C:/your/install/folder"
+```
+
+This places the binary at `<prefix>/bin/stream-overlay.exe`. If
+`--prefix` is omitted CMake uses its default
+(`C:/Program Files/stream-overlay`).
+
+For a Visual Studio Release build:
+
+``` bash
+cmake --build build/vs --config Release
+cmake --install build/vs --config Release --prefix "C:/your/install/folder"
+```
 
 ## Future Features
 

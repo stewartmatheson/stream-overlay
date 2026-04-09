@@ -8,6 +8,9 @@ public class SocliConfig
   [JsonPropertyName("pomodoro")]
   public PomodoroConfig Pomodoro { get; set; } = new();
 
+  [JsonPropertyName("prelaunch")]
+  public List<string> Prelaunch { get; set; } = [];
+
   [JsonPropertyName("applications")]
   public List<string> Applications { get; set; } = [];
 

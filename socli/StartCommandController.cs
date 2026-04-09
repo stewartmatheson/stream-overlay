@@ -66,6 +66,23 @@ public class StartCommandController
     }
   }
 
+  public async Task<(bool success, string command, int exitCode)> RunPrelaunchCommand(string command)
+  {
+    var parts = command.Split(' ', 2);
+    var psi = new ProcessStartInfo
+    {
+      FileName = parts[0],
+      Arguments = parts.Length > 1 ? parts[1] : "",
+      UseShellExecute = false
+    };
+
+    using var process = Process.Start(psi)
+        ?? throw new InvalidOperationException($"Failed to start prelaunch command: {command}");
+
+    await process.WaitForExitAsync();
+    return (process.ExitCode == 0, command, process.ExitCode);
+  }
+
   private static string? FindInPath(string executable)
   {
     var pathVar = Environment.GetEnvironmentVariable("PATH") ?? "";

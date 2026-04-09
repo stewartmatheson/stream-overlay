@@ -21,3 +21,5 @@ target_link_libraries(stream-overlay PRIVATE
     dwrite
     ws2_32
 )
+
+install(TARGETS stream-overlay RUNTIME DESTINATION bin)
