@@ -95,7 +95,38 @@ dotnet run -- server
 
 ## Installation
 
-Publish a self-contained exe and install it to `~/.local/bin`:
+The `install.ps1` script publishes a self-contained exe, copies it to an
+install directory, and registers it as a Windows service
+(`PomodoroTimer`) that runs in server mode. Run from an elevated
+PowerShell prompt.
+
+``` powershell
+# Install to the default location ($env:ProgramFiles\PomodoroTimer)
+.\install.ps1 install
+
+# Install to a custom directory
+.\install.ps1 install "C:\Tools\Pomodoro"
+
+# Uninstall (removes the service and the install directory)
+.\install.ps1 uninstall
+```
+
+The service is configured with automatic startup and recovery actions
+that restart it after 5s, 10s, then 30s on failure.
+
+Once installed, manage it with the standard Windows tools:
+
+``` powershell
+Start-Service PomodoroTimer
+Stop-Service PomodoroTimer
+Get-Service PomodoroTimer
+```
+
+Or use `services.msc` for the GUI.
+
+### Manual publish
+
+If you just want a standalone exe without the service:
 
 ``` bash
 dotnet publish .\Pomodoro.csproj -c Release -r win-x64 --self-contained -o ~/.local/bin

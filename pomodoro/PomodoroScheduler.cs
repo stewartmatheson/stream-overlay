@@ -1,11 +1,13 @@
 namespace Pomodoro;
 
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 public class PomodoroScheduler
 {
-  private readonly IPomodoroEventHandler _consoleHandler;
+  private readonly IPomodoroEventHandler _loggingHandler;
   private readonly IPomodoroEventHandler _overlayHandler;
+  private readonly ILogger<PomodoroScheduler> _logger;
   private readonly List<TimeBlock> _blocks = new();
   private readonly object _lock = new();
   private CancellationTokenSource? _scheduleCts;
@@ -14,10 +16,11 @@ public class PomodoroScheduler
   private DateTime _phaseStartedAt;
   private TimeSpan _phaseDuration;
 
-  public PomodoroScheduler(IPomodoroEventHandler consoleHandler, IPomodoroEventHandler overlayHandler)
+  public PomodoroScheduler(IPomodoroEventHandler loggingHandler, IPomodoroEventHandler overlayHandler, ILogger<PomodoroScheduler> logger)
   {
-    _consoleHandler = consoleHandler;
+    _loggingHandler = loggingHandler;
     _overlayHandler = overlayHandler;
+    _logger = logger;
   }
 
   public void ReplaceSchedule(PomodoroSchedule schedule, CancellationToken appToken)
@@ -57,7 +60,7 @@ public class PomodoroScheduler
       _scheduleCts.Cancel();
       _scheduleCts.Dispose();
       _scheduleCts = null;
-      Console.WriteLine("Cancelled previous schedule.");
+      _logger.LogInformation("Cancelled previous schedule.");
     }
   }
 
@@ -144,7 +147,7 @@ public class PomodoroScheduler
           1
         );
 
-        timer.RegisterEventHandler(_consoleHandler);
+        timer.RegisterEventHandler(_loggingHandler);
         timer.RegisterEventHandler(_overlayHandler);
         timer.WorkStarted += (_, e) =>
         {
@@ -171,7 +174,7 @@ public class PomodoroScheduler
         }
         catch (OperationCanceledException)
         {
-          Console.WriteLine("Schedule cancelled.");
+          _logger.LogInformation("Schedule cancelled.");
           return;
         }
 
@@ -183,7 +186,7 @@ public class PomodoroScheduler
         _currentIndex = -1;
       }
 
-      Console.WriteLine("Schedule complete.");
+      _logger.LogInformation("Schedule complete.");
     }, token);
   }
 }

@@ -3,6 +3,7 @@ namespace Pomodoro;
 using System;
 using System.Net.Sockets;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 public class PomodoroEventArgs : EventArgs
 {
@@ -76,33 +77,33 @@ public class EventMessageBodyBuilder
   }
 }
 
-public class ConsoleEventHandler : IPomodoroEventHandler
+public class LoggingEventHandler : IPomodoroEventHandler
 {
+  private readonly ILogger<LoggingEventHandler> _logger;
+
+  public LoggingEventHandler(ILogger<LoggingEventHandler> logger)
+  {
+    _logger = logger;
+  }
+
   public void OnWorkStarted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.WorkStartedTitle(e), EventMessageBodyBuilder.WorkSummary(e));
+    _logger.LogInformation("{Title} - {Body}", EventTitleBuilder.WorkStartedTitle(e), EventMessageBodyBuilder.WorkSummary(e));
   }
 
   public void OnRestStarted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.RestStartedTitle(e), EventMessageBodyBuilder.RestSummary(e));
+    _logger.LogInformation("{Title} - {Body}", EventTitleBuilder.RestStartedTitle(e), EventMessageBodyBuilder.RestSummary(e));
   }
 
   public void OnBlockCompleted(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.BlockCompletedTitle(e), EventMessageBodyBuilder.WorkSummary(e));
+    _logger.LogInformation("{Title} - {Body}", EventTitleBuilder.BlockCompletedTitle(e), EventMessageBodyBuilder.WorkSummary(e));
   }
 
   public void OnIntervalElapsed(object? sender, PomodoroEventArgs e)
   {
-    SendMessage(EventTitleBuilder.IntervalTitle(e), EventMessageBodyBuilder.WorkSummary(e));
-  }
-
-  private static void SendMessage(string title, string body)
-  {
-    Console.WriteLine(title);
-    Console.WriteLine(body);
-    Console.WriteLine("");
+    _logger.LogInformation("{Title} - {Body}", EventTitleBuilder.IntervalTitle(e), EventMessageBodyBuilder.WorkSummary(e));
   }
 }
 
