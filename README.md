@@ -95,5 +95,5 @@ See the [socli README](socli/README.md) for full configuration details.
 
 ## TODO
 
-- Get the twitch api call working
-- Figure out how to run both v4 and pom as windows services.
+- Rename v4 to something better
+- Wrap v4 in a service. Are we going too hard at Windows?

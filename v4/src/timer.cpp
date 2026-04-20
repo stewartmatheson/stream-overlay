@@ -1,4 +1,5 @@
 #include "timer.h"
+#include "sound.h"
 #include <charconv>
 #include <cstdio>
 #include <vector>
@@ -68,6 +69,7 @@ void Timer::update(float dt) {
     if (remaining_ <= 0.f) {
         remaining_ = 0.f;
         state_ = State::Hidden;
+        play_alarm();
     }
 }
 

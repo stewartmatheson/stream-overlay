@@ -161,6 +161,12 @@ cmake --install build/vs --config Release --prefix "C:/your/install/folder"
 
 ## Future Features
 
+### Sounds
+
+An alarm that plays when the timer is at zero. What does the alarm sound
+like? How do we generate the sound? Can we use programming to render a
+wave for the alarm sound?
+
 ### Window at the Bottom
 
 Start the app so the window is always at the bottom of all other already

@@ -11,6 +11,7 @@ add_executable(stream-overlay WIN32
     src/bottom_popup.cpp
     src/bbcode.cpp
     src/timer.cpp
+    src/sound.cpp
 )
 
 target_link_libraries(stream-overlay PRIVATE
@@ -20,6 +21,7 @@ target_link_libraries(stream-overlay PRIVATE
     dcomp
     dwrite
     ws2_32
+    winmm
 )
 
 install(TARGETS stream-overlay RUNTIME DESTINATION bin)
