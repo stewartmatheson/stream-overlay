@@ -94,6 +94,30 @@ timer Break|05:00|100,50
 
 Hides the current timer immediately.
 
+### Mode: List control
+
+A list control for our overlay. First use case will be for the list of
+current pom tasks. The list will change when the timer stops. The pom
+service will drive the list updates. Think of the ESPN show "pardon the
+interruption".
+
+#### Features
+
+- An array of items for the list
+- The list should have a display width. Long items will be truncated
+- The list should have an x and y value for where it needs to be
+  rendered
+- The list will have a set command which takes text in bbcode and
+  creates a new list item for each new line in the list content
+- The list will support a clear command which will remove the list and
+  stop it from rendering
+- Only one list can be displayed at once.
+- The active task is always the first item.
+- The list has nothing to do with the timer. It will always be updated
+  via the set command externally.
+- This list should use the same bbcode tags that are already supported
+  by other modes in the aplication
+
 ### BBCode Formatting
 
 The `Body` field supports BBCode tags for inline formatting. Tags can be

@@ -12,6 +12,7 @@ add_executable(stream-overlay WIN32
     src/bbcode.cpp
     src/timer.cpp
     src/sound.cpp
+    src/list_control.cpp
 )
 
 target_link_libraries(stream-overlay PRIVATE

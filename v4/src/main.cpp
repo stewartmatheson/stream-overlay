@@ -22,6 +22,7 @@
 #include "tcp_server.h"
 #include "mode.h"
 #include "bottom_popup.h"
+#include "list_control.h"
 #include "timer.h"
 
 static Renderer              g_renderer;
@@ -126,6 +127,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     // Register modes
     g_modes.push_back(std::make_unique<Timer>());
     g_modes.push_back(std::make_unique<BottomPopup>());
+    g_modes.push_back(std::make_unique<ListControl>());
 
     // Start TCP server
     if (!g_server.start(7777)) return 1;
