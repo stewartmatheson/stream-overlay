@@ -1,7 +1,7 @@
-param(
-    [string]$Items = "Task 1\nTask 2\nTask 3",
-    [int]$Width = 400,
-    [string]$Position = "100,100",
+﻿param(
+    [string[]]$Items = @("[b]Task 1[/b]", "Task 2", "Task 3", "Task 4"),
+    [int]$Width = 285,
+    [string]$Position = "1598,475",
     [switch]$Clear,
     [int]$Port = 7777
 )
@@ -9,7 +9,8 @@ param(
 if ($Clear) {
     $msg = "list clear"
 } else {
-    $msg = "list set $Items|$Width|$Position"
+    $joined = $Items -join "\n"
+    $msg = "list set $joined|$Width|$Position"
 }
 
 $client = New-Object System.Net.Sockets.TcpClient("127.0.0.1", $Port)

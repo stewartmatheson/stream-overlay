@@ -36,5 +36,10 @@ private:
     static constexpr float kPad = 16.f;
     static constexpr float kItemHeight = 32.f;
     static constexpr float kItemGap = 4.f;
-    static constexpr float kCornerRadius = 8.f;
+    static constexpr float kCornerRadius = 0.f;
+
+    float shadow_blur_ = 7.f;
+    float shadow_offset_x_ = 4.f;
+    float shadow_offset_y_ = 4.f;
+    D2D1_COLOR_F shadow_color_ = {0.f, 0.f, 0.f, 1.f};
 };

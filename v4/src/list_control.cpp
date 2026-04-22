@@ -84,6 +84,9 @@ void ListControl::render(Renderer& r) {
         + static_cast<float>(items_.size() - 1) * kItemGap;
 
     D2D1_RECT_F bg = {x_, y_, x_ + width_, y_ + list_height};
+    if (shadow_blur_ > 0.f)
+        r.draw_drop_shadow(bg, kCornerRadius, shadow_color_, shadow_blur_,
+                           shadow_offset_x_, shadow_offset_y_);
     r.draw_rounded_rect(bg, scheme_.bg, scheme_.bg, kCornerRadius, 0.f);
 
     float item_y = y_ + kPad;

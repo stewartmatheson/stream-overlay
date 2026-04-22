@@ -1,6 +1,7 @@
 #pragma once
 
 #include <d2d1_1.h>
+#include <d2d1effects.h>
 #include <d3d11.h>
 #include <dxgi1_2.h>
 #include <dcomp.h>
@@ -29,6 +30,9 @@ public:
     void draw_text_bold(std::wstring_view text, D2D1_RECT_F rect, D2D1_COLOR_F color);
     void draw_rich_text(const std::wstring& text, const std::vector<TextSpan>& spans,
                         D2D1_RECT_F rect, D2D1_COLOR_F color, bool is_title = false);
+    void draw_drop_shadow(D2D1_RECT_F rect, float corner_radius,
+                          D2D1_COLOR_F color, float blur_radius,
+                          float offset_x = 0.f, float offset_y = 0.f);
     void draw_border(D2D1_RECT_F rect, D2D1_COLOR_F color, float width = 2.f);
 
     float screen_width() const;

@@ -1,3 +1,4 @@
+#include <initguid.h>
 #include "renderer.h"
 #include "bbcode.h"
 
@@ -224,6 +225,36 @@ void Renderer::draw_rich_text(const std::wstring& text, const std::vector<TextSp
     brush_->SetColor(color);
     dc_->DrawTextLayout({rect.left, rect.top}, layout.Get(), brush_.Get(),
                         D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT);
+}
+
+void Renderer::draw_drop_shadow(D2D1_RECT_F rect, float corner_radius,
+                                 D2D1_COLOR_F color, float blur_radius,
+                                 float offset_x, float offset_y) {
+    ComPtr<ID2D1CommandList> cmd_list;
+    HRESULT hr = dc_->CreateCommandList(cmd_list.GetAddressOf());
+    if (FAILED(hr)) return;
+
+    auto old_target = ComPtr<ID2D1Image>();
+    dc_->GetTarget(old_target.GetAddressOf());
+    dc_->SetTarget(cmd_list.Get());
+
+    auto rr = D2D1::RoundedRect(rect, corner_radius, corner_radius);
+    brush_->SetColor(D2D1::ColorF(1.f, 1.f, 1.f, 1.f));
+    dc_->FillRoundedRectangle(rr, brush_.Get());
+
+    dc_->SetTarget(old_target.Get());
+    cmd_list->Close();
+
+    ComPtr<ID2D1Effect> shadow;
+    hr = dc_->CreateEffect(CLSID_D2D1Shadow, shadow.GetAddressOf());
+    if (FAILED(hr)) return;
+
+    shadow->SetInput(0, cmd_list.Get());
+    shadow->SetValue(D2D1_SHADOW_PROP_BLUR_STANDARD_DEVIATION, blur_radius);
+    D2D1_VECTOR_4F col = {color.r, color.g, color.b, color.a};
+    shadow->SetValue(D2D1_SHADOW_PROP_COLOR, col);
+
+    dc_->DrawImage(shadow.Get(), D2D1::Point2F(offset_x, offset_y));
 }
 
 void Renderer::draw_border(D2D1_RECT_F rect, D2D1_COLOR_F color, float width) {
