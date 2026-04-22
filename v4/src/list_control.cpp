@@ -1,6 +1,5 @@
 #include "list_control.h"
 #include <charconv>
-
 std::wstring ListControl::to_wide(std::string_view s) {
     if (s.empty()) return {};
     int len = MultiByteToWideChar(CP_UTF8, 0, s.data(), static_cast<int>(s.size()), nullptr, 0);
@@ -14,6 +13,7 @@ bool ListControl::on_command(std::string_view command, std::string_view args) {
 
     if (args.starts_with("clear")) {
         items_.clear();
+        title_.clear();
         state_ = State::Hidden;
         return true;
     }
@@ -50,6 +50,9 @@ bool ListControl::on_command(std::string_view command, std::string_view args) {
     x_ = static_cast<float>(xi);
     y_ = static_cast<float>(yi);
 
+    // Optional title (4th field)
+    title_ = fields.size() >= 4 ? to_wide(fields[3]) : std::wstring{};
+
     // Split content on literal "\n" (the two-char sequence backslash-n from TCP)
     items_.clear();
     auto content = fields[0];
@@ -79,17 +82,37 @@ void ListControl::update(float /*dt*/) {}
 void ListControl::render(Renderer& r) {
     if (state_ == State::Hidden || items_.empty()) return;
 
+    bool has_title = !title_.empty();
+    float title_section = has_title ? kTitleHeight : 0.f;
+
     float list_height = kPad * 2.f
         + static_cast<float>(items_.size()) * kItemHeight
         + static_cast<float>(items_.size() - 1) * kItemGap;
 
-    D2D1_RECT_F bg = {x_, y_, x_ + width_, y_ + list_height};
+    float total_height = title_section + list_height;
+    D2D1_RECT_F full = {x_, y_, x_ + width_, y_ + total_height};
+
     if (shadow_blur_ > 0.f)
-        r.draw_drop_shadow(bg, kCornerRadius, shadow_color_, shadow_blur_,
+        r.draw_drop_shadow(full, kCornerRadius, shadow_color_, shadow_blur_,
                            shadow_offset_x_, shadow_offset_y_);
+
+    if (has_title) {
+        D2D1_RECT_F title_bg = {x_, y_, x_ + width_, y_ + title_section};
+        r.draw_rounded_rect(title_bg, scheme_.title_bar_bg, scheme_.title_bar_bg, kCornerRadius, 0.f);
+
+        D2D1_RECT_F title_text_rect = {
+            x_ + kPad,
+            y_ + kTitlePad,
+            x_ + width_ - kPad,
+            y_ + title_section
+        };
+        r.draw_text(title_, title_text_rect, scheme_.title_bar_fg, true);
+    }
+
+    D2D1_RECT_F bg = {x_, y_ + title_section, x_ + width_, y_ + total_height};
     r.draw_rounded_rect(bg, scheme_.bg, scheme_.bg, kCornerRadius, 0.f);
 
-    float item_y = y_ + kPad;
+    float item_y = y_ + title_section + kPad;
     for (const auto& item : items_) {
         D2D1_RECT_F item_rect = {
             x_ + kPad,
@@ -97,7 +120,7 @@ void ListControl::render(Renderer& r) {
             x_ + width_ - kPad,
             item_y + kItemHeight
         };
-        r.draw_rich_text(item.text, item.spans, item_rect, scheme_.fg, false);
+        r.draw_rich_text(item.text, item.spans, item_rect, scheme_.fg, false, true);
         item_y += kItemHeight + kItemGap;
     }
 }

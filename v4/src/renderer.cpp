@@ -50,6 +50,10 @@ bool Renderer::init(HWND hwnd) {
         26.f, L"en-us", title_fmt_.GetAddressOf());
 
     dwrite_->CreateTextFormat(L"JetBrainsMono Nerd Font", nullptr,
+        DWRITE_FONT_WEIGHT_EXTRA_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+        22.f, L"en-us", ui_title_fmt_.GetAddressOf());
+
+    dwrite_->CreateTextFormat(L"JetBrainsMono Nerd Font", nullptr,
         DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
         20.f, L"en-us", body_fmt_.GetAddressOf());
 
@@ -58,6 +62,7 @@ bool Renderer::init(HWND hwnd) {
         20.f, L"en-us", timer_fmt_.GetAddressOf());
     if (timer_fmt_) timer_fmt_->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
 
+    if (ui_title_fmt_) ui_title_fmt_->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
     if (title_fmt_) title_fmt_->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
     if (body_fmt_)  body_fmt_->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
 
@@ -188,12 +193,13 @@ void Renderer::draw_text_bold(std::wstring_view text, D2D1_RECT_F rect, D2D1_COL
 void Renderer::draw_text(std::wstring_view text, D2D1_RECT_F rect, D2D1_COLOR_F color, bool is_title) {
     brush_->SetColor(color);
     dc_->DrawText(text.data(), static_cast<UINT32>(text.size()),
-        is_title ? title_fmt_.Get() : body_fmt_.Get(), rect, brush_.Get(),
+        is_title ? ui_title_fmt_.Get() : body_fmt_.Get(), rect, brush_.Get(),
         D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT);
 }
 
 void Renderer::draw_rich_text(const std::wstring& text, const std::vector<TextSpan>& spans,
-                               D2D1_RECT_F rect, D2D1_COLOR_F color, bool is_title) {
+                               D2D1_RECT_F rect, D2D1_COLOR_F color, bool is_title,
+                               bool truncate) {
     IDWriteTextFormat* fmt = is_title ? title_fmt_.Get() : body_fmt_.Get();
     float max_w = rect.right - rect.left;
     float max_h = rect.bottom - rect.top;
@@ -202,6 +208,14 @@ void Renderer::draw_rich_text(const std::wstring& text, const std::vector<TextSp
     HRESULT hr = dwrite_->CreateTextLayout(text.c_str(), static_cast<UINT32>(text.size()),
                                            fmt, max_w, max_h, layout.GetAddressOf());
     if (FAILED(hr)) return;
+
+    if (truncate) {
+        layout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
+        DWRITE_TRIMMING trimming{DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
+        ComPtr<IDWriteInlineObject> ellipsis;
+        dwrite_->CreateEllipsisTrimmingSign(fmt, ellipsis.GetAddressOf());
+        layout->SetTrimming(&trimming, ellipsis.Get());
+    }
 
     for (const auto& span : spans) {
         DWRITE_TEXT_RANGE range{span.start, span.length};
