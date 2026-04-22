@@ -107,6 +107,14 @@ public class LoggingEventHandler : IPomodoroEventHandler
   }
 }
 
+public record OverlayPosition(int X, int Y);
+
+public static class OverlayPositions
+{
+  public static readonly OverlayPosition DesktopBottomRight = new(1459, 1046);
+  public static readonly OverlayPosition TasksListTitleRight = new(1767,480);
+}
+
 public class OverlayEventHandler : IPomodoroEventHandler
 {
   private const int Port = 7777;
@@ -126,23 +134,23 @@ public class OverlayEventHandler : IPomodoroEventHandler
     SendTcp($"bottompopup {title}|{body}");
   }
 
-  private static void SendTimerCommand(string label, TimeSpan remaining, int x = 1459, int y = 1046)
+  private static void SendTimerCommand(string label, TimeSpan remaining, OverlayPosition position)
   {
     int minutes = (int)remaining.TotalMinutes;
     int seconds = remaining.Seconds;
-    SendTcp($"timer {label}|{minutes:D2}:{seconds:D2}|{x},{y}");
+    SendTcp($"timer {label}|{minutes:D2}:{seconds:D2}|{position.X},{position.Y}");
   }
 
   public void OnWorkStarted(object? sender, PomodoroEventArgs e)
   {
     SendBottomPopupMessage(EventTitleBuilder.WorkStartedTitle(e), EventMessageBodyBuilder.WorkSummary(e));
-    SendTimerCommand("🍅", e.TimeRemaining);
+    SendTimerCommand("🍅", e.TimeRemaining, OverlayPositions.TasksListTitleRight);
   }
 
   public void OnRestStarted(object? sender, PomodoroEventArgs e)
   {
     SendBottomPopupMessage(EventTitleBuilder.RestStartedTitle(e), EventMessageBodyBuilder.RestSummary(e));
-    SendTimerCommand("🍅", e.TimeRemaining);
+    SendTimerCommand("🍅", e.TimeRemaining, OverlayPositions.TasksListTitleRight);
   }
 
   public void OnBlockCompleted(object? sender, PomodoroEventArgs e)
