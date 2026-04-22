@@ -52,6 +52,7 @@ public class PomodoroService : BackgroundService
 
     _scheduler.Stop();
     _overlayEventHandler.ClearTimer();
+    _overlayEventHandler.ClearList();
     listener.Stop();
     _logger.LogInformation("Shutting down.");
   }

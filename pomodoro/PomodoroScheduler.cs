@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 public class PomodoroScheduler
 {
   private readonly IPomodoroEventHandler _loggingHandler;
-  private readonly IPomodoroEventHandler _overlayHandler;
+  private readonly OverlayEventHandler _overlayHandler;
   private readonly ILogger<PomodoroScheduler> _logger;
   private readonly List<TimeBlock> _blocks = new();
   private readonly object _lock = new();
@@ -16,7 +16,7 @@ public class PomodoroScheduler
   private DateTime _phaseStartedAt;
   private TimeSpan _phaseDuration;
 
-  public PomodoroScheduler(IPomodoroEventHandler loggingHandler, IPomodoroEventHandler overlayHandler, ILogger<PomodoroScheduler> logger)
+  public PomodoroScheduler(IPomodoroEventHandler loggingHandler, OverlayEventHandler overlayHandler, ILogger<PomodoroScheduler> logger)
   {
     _loggingHandler = loggingHandler;
     _overlayHandler = overlayHandler;
@@ -50,6 +50,8 @@ public class PomodoroScheduler
         StartRunner(startIndex, appToken);
         return;
       }
+
+      _overlayHandler.SendListUpdate(_blocks, _currentIndex);
     }
   }
 
@@ -72,6 +74,7 @@ public class PomodoroScheduler
       _blocks.Clear();
       _currentIndex = -1;
     }
+    _overlayHandler.ClearList();
   }
 
   public string GetStatus()
@@ -137,6 +140,7 @@ public class PomodoroScheduler
           if (i >= _blocks.Count) break;
           block = _blocks[i];
           _currentIndex = i;
+          _overlayHandler.SendListUpdate(_blocks, i);
         }
 
         var timer = new PomodoroTimer(
@@ -186,6 +190,7 @@ public class PomodoroScheduler
         _currentIndex = -1;
       }
 
+      _overlayHandler.ClearList();
       _logger.LogInformation("Schedule complete.");
     }, token);
   }

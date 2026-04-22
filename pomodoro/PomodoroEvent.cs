@@ -159,4 +159,27 @@ public class OverlayEventHandler : IPomodoroEventHandler
   {
     SendTcp("timer_clear");
   }
+
+  public void SendListUpdate(List<TimeBlock> blocks, int currentIndex)
+  {
+    var items = new List<string>();
+
+    var activeTaskHexColor = "73daca";
+    for (int i = currentIndex; i < blocks.Count; i++)
+    {
+      var name = blocks[i].Task.Name;
+      if (i == currentIndex)
+        items.Add($"[color={activeTaskHexColor}][b]{name}[/b][/color]");
+      else
+        items.Add(name);
+    }
+    var content = string.Join("\\n", items);
+    var title = "tasks";
+    SendTcp($"list set {content}|285|1598,475|{title}");
+  }
+
+  public void ClearList()
+  {
+    SendTcp("list clear");
+  }
 }
