@@ -3,11 +3,15 @@
 param(
     [Parameter(Position=0)]
     [ValidateSet("install", "uninstall")]
-    [string]$Action = "install",
-
-    [Parameter(Position=1)]
-    [string]$InstallPath = "$env:ProgramFiles\PomodoroTimer"
+    [string]$Action = "install"
 )
+
+if (-not $env:STREAM_OVERLAY_HOME) {
+    Write-Error "STREAM_OVERLAY_HOME environment variable is not set."
+    exit 1
+}
+
+$installPath = "$env:STREAM_OVERLAY_HOME\pomodoro"
 
 $ErrorActionPreference = "Stop"
 $ServiceName = "PomodoroTimer"
