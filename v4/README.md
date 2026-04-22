@@ -94,29 +94,54 @@ timer Break|05:00|100,50
 
 Hides the current timer immediately.
 
-### Mode: List control
+### Mode: List Control
 
-A list control for our overlay. First use case will be for the list of
-current pom tasks. The list will change when the timer stops. The pom
-service will drive the list updates. Think of the ESPN show "pardon the
-interruption".
+#### `list set Content|Width|X,Y`
 
-#### Features
+Displays a list of items at the given pixel position. Items within the
+content are separated by literal `\n` (the two-character sequence). Each
+item supports BBCode formatting. Only one list can be displayed at a
+time — sending a new `set` command replaces the current list. The active
+task is always the first item.
 
-- An array of items for the list
-- The list should have a display width. Long items will be truncated
-- The list should have an x and y value for where it needs to be
-  rendered
-- The list will have a set command which takes text in bbcode and
-  creates a new list item for each new line in the list content
-- The list will support a clear command which will remove the list and
-  stop it from rendering
-- Only one list can be displayed at once.
-- The active task is always the first item.
-- The list has nothing to do with the timer. It will always be updated
-  via the set command externally.
-- This list should use the same bbcode tags that are already supported
-  by other modes in the aplication
+  Parameter   Type     Description
+  ----------- -------- -------------------------------------------
+  `Content`   string   Items separated by `\n` (supports BBCode)
+  `Width`     int      Display width in pixels
+  `X,Y`       string   Screen position in pixels
+
+Example:
+
+``` text
+list set [b]Task 1[/b]\nTask 2\nTask 3|285|1598,475
+```
+
+#### `list clear`
+
+Hides the list and removes all items.
+
+**Helper script** --- `scripts/send-list.ps1` (PowerShell):
+
+``` powershell
+# Defaults — sends a 4-item list
+.\scripts\send-list.ps1
+
+# Custom items
+.\scripts\send-list.ps1 -Items "Buy milk", "Walk dog", "Code stuff"
+
+# With BBCode
+.\scripts\send-list.ps1 -Items "[b]Active task[/b]", "Next task"
+
+# Custom width and position
+.\scripts\send-list.ps1 -Items "Task 1", "Task 2" -Width 400 -Position "100,200"
+
+# Clear the list
+.\scripts\send-list.ps1 -Clear
+```
+
+**Note:** The `.ps1` script must be saved with a UTF-8 BOM for emoji
+and non-ASCII characters in default parameter values to work correctly
+under Windows PowerShell 5.1.
 
 ### BBCode Formatting
 
