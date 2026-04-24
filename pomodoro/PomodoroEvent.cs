@@ -112,7 +112,7 @@ public record OverlayPosition(int X, int Y);
 public static class OverlayPositions
 {
   public static readonly OverlayPosition DesktopBottomRight = new(1459, 1046);
-  public static readonly OverlayPosition TasksListTitleRight = new(1767,480);
+  public static readonly OverlayPosition TasksListTitleRight = new(1767, 480);
 }
 
 public class OverlayEventHandler : IPomodoroEventHandler
@@ -168,21 +168,35 @@ public class OverlayEventHandler : IPomodoroEventHandler
     SendTcp("timer_clear");
   }
 
-  public void SendListUpdate(List<TimeBlock> blocks, int currentIndex)
+  public void SendListUpdate(List<TimeBlock> blocks, int currentIndex, bool isResting)
   {
     var items = new List<string>();
 
     var activeTaskHexColor = "73daca";
+    var restColor = "28344a";
+
     for (int i = currentIndex; i < blocks.Count; i++)
     {
       var name = blocks[i].Task.Name;
       if (i == currentIndex)
-        items.Add($"[color={activeTaskHexColor}][b]{name}[/b][/color]");
+      {
+        if (isResting)
+        {
+          items.Add($"💤 [color={restColor}]rest[/color]");
+        }
+        else
+        {
+          items.Add($"🗒️ [color={activeTaskHexColor}][b]{name}[/b][/color]");
+        }
+      }
       else
-        items.Add(name);
+        items.Add($"🗒️ {name}");
+
+      items.Add($"💤 [color={restColor}]rest[/color]");
     }
+
     var content = string.Join("\\n", items);
-    var title = "tasks";
+    var title = isResting ? "resting" : "tasks";
     SendTcp($"list set {content}|285|1598,475|{title}");
   }
 

@@ -184,3 +184,8 @@ format
 
 - .NET 10.0
 - C#
+
+## BUGS
+
+1.  When resting the previous task still displays. If in rest mode we
+    should pop the first task off the list.

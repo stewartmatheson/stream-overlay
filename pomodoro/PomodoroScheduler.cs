@@ -51,7 +51,7 @@ public class PomodoroScheduler
         return;
       }
 
-      _overlayHandler.SendListUpdate(_blocks, _currentIndex);
+      _overlayHandler.SendListUpdate(_blocks, _currentIndex, !_isWorkPhase);
     }
   }
 
@@ -140,7 +140,7 @@ public class PomodoroScheduler
           if (i >= _blocks.Count) break;
           block = _blocks[i];
           _currentIndex = i;
-          _overlayHandler.SendListUpdate(_blocks, i);
+          _overlayHandler.SendListUpdate(_blocks, i, false);
         }
 
         var timer = new PomodoroTimer(
@@ -169,6 +169,7 @@ public class PomodoroScheduler
             _isWorkPhase = false;
             _phaseStartedAt = DateTime.UtcNow;
             _phaseDuration = e.TimeRemaining;
+            _overlayHandler.SendListUpdate(_blocks, _currentIndex, true);
           }
         };
 
