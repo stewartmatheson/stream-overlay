@@ -36,7 +36,7 @@ private:
 
     static constexpr float kPad = 16.f;
     static constexpr float kTitlePad = 6.f;
-    static constexpr float kItemHeight = 32.f;
+    static constexpr float kItemHeight = 26.f;
     static constexpr float kItemGap = 4.f;
     static constexpr float kCornerRadius = 0.f;
     static constexpr float kTitleHeight = 39.f;

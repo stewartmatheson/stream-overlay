@@ -120,7 +120,7 @@ void ListControl::render(Renderer& r) {
             x_ + width_ - kPad,
             item_y + kItemHeight
         };
-        r.draw_rich_text(item.text, item.spans, item_rect, scheme_.fg, false, true);
+        r.draw_rich_text(item.text, item.spans, item_rect, scheme_.fg, false, true, true);
         item_y += kItemHeight + kItemGap;
     }
 }

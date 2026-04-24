@@ -30,7 +30,7 @@ public:
     void draw_text_bold(std::wstring_view text, D2D1_RECT_F rect, D2D1_COLOR_F color);
     void draw_rich_text(const std::wstring& text, const std::vector<TextSpan>& spans,
                         D2D1_RECT_F rect, D2D1_COLOR_F color, bool is_title = false,
-                        bool truncate = false);
+                        bool truncate = false, bool small_body = false);
     void draw_drop_shadow(D2D1_RECT_F rect, float corner_radius,
                           D2D1_COLOR_F color, float blur_radius,
                           float offset_x = 0.f, float offset_y = 0.f);
@@ -66,6 +66,7 @@ private:
     ComPtr<IDWriteTextFormat>  title_fmt_;
     ComPtr<IDWriteTextFormat>  ui_title_fmt_;
     ComPtr<IDWriteTextFormat>  body_fmt_;
+    ComPtr<IDWriteTextFormat>  small_body_fmt_;
     ComPtr<IDWriteTextFormat>  timer_fmt_;
 
     bool create_swap_chain();
