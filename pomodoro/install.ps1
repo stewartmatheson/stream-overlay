@@ -40,7 +40,6 @@ function Install-Files {
 switch ($Action) {
     "install" {
         Publish-App
-        Install-Files
 
         if (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue) {
             Write-Output "Service '$ServiceName' already exists. Stopping and removing..."
@@ -56,16 +55,19 @@ switch ($Action) {
             }
         }
 
+        Install-Files
+
         sc.exe create $ServiceName binPath= "`"$ExePath`" server" start= auto displayname= "$DisplayName"
         sc.exe description $ServiceName "$Description"
         sc.exe failure $ServiceName reset= 86400 actions= restart/5000/restart/10000/restart/30000
 
-        if ($LASTEXITCODE -eq 0) {
-            Write-Output "Service '$ServiceName' installed successfully."
-            Write-Output "Start it with: Start-Service $ServiceName"
-        } else {
+        if ($LASTEXITCODE -ne 0) {
             throw "Failed to create service"
         }
+
+        Write-Output "Service '$ServiceName' installed successfully. Starting..."
+        Start-Service $ServiceName
+        Write-Output "Service '$ServiceName' is running."
     }
     "uninstall" {
         sc.exe stop $ServiceName 2>$null
