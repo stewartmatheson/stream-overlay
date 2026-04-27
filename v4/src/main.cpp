@@ -22,6 +22,7 @@
 #include "tcp_server.h"
 #include "mode.h"
 #include "bottom_popup.h"
+#include "label.h"
 #include "list_control.h"
 #include "timer.h"
 
@@ -126,6 +127,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
     // Register modes
     g_modes.push_back(std::make_unique<BottomPopup>());
+    g_modes.push_back(std::make_unique<Label>());
     g_modes.push_back(std::make_unique<ListControl>());
     g_modes.push_back(std::make_unique<Timer>());
 
