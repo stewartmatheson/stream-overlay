@@ -171,27 +171,33 @@ public class OverlayEventHandler : IPomodoroEventHandler
   public void SendListUpdate(List<TimeBlock> blocks, int currentIndex, bool isResting)
   {
     var items = new List<string>();
-
-    var activeTaskHexColor = "73daca";
     var restColor = "28344a";
+    var activeTaskHexColor = "73daca";
+
+    if (isResting)
+    {
+      currentIndex++;
+      items.Add($"💤 [color={restColor}]rest[/color]");
+    }
 
     for (int i = currentIndex; i < blocks.Count; i++)
     {
       var name = blocks[i].Task.Name;
-      if (i == currentIndex)
+      if (isResting)
       {
-        if (isResting)
-        {
-          items.Add($"💤 [color={restColor}]rest[/color]");
-        }
-        else
+        items.Add($"🗒️ {name}");
+      }
+      else
+      {
+        if (i == currentIndex)
         {
           items.Add($"🗒️ [color={activeTaskHexColor}][b]{name}[/b][/color]");
         }
+        else
+        {
+          items.Add($"🗒️ {name}");
+        }
       }
-      else
-        items.Add($"🗒️ {name}");
-
       items.Add($"💤 [color={restColor}]rest[/color]");
     }
 

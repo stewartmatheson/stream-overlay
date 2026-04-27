@@ -89,8 +89,8 @@ public class PomodoroService : BackgroundService
   {
     var block = new TimeBlock
     {
-      WorkDuration = 25,
-      RestDuration = 5,
+      WorkDuration = 1,
+      RestDuration = 1,
       Task = new PomodoroTask { Name = taskName, Description = taskName }
     };
     _scheduler.AddBlock(block, token);
