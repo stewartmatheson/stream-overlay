@@ -57,6 +57,58 @@ public static class StartCommand
     return await UpdateTwitch(view, config, activity) ? 0 : 1;
   }
 
+  public static async Task<int> RunUpdateTitleAsync()
+  {
+    var view = new StartCommandView();
+    var controller = new StartCommandController();
+    var config = SocliConfig.Load();
+
+    var title = view.PromptForOverlayTitle("");
+    if (string.IsNullOrWhiteSpace(title))
+    {
+      view.ShowError("No title provided.");
+      return 1;
+    }
+
+    await SendOverlayLabel(controller, view, title);
+    await UpdateTwitchTitle(view, config, title);
+
+    return 0;
+  }
+
+  private static async Task UpdateTwitchTitle(StartCommandView view, SocliConfig config, string title)
+  {
+    using var twitch = new TwitchService(config);
+
+    if (!twitch.IsConfigured)
+    {
+      view.ShowWarning("Twitch not configured — skipping title update.");
+      return;
+    }
+
+    if (!twitch.IsAuthenticated)
+    {
+      view.ShowInfo("Twitch authentication required. Opening browser...");
+      if (!await twitch.AuthenticateAsync())
+      {
+        view.ShowError("Twitch authentication failed.");
+        return;
+      }
+      view.ShowSuccess("Twitch authenticated!");
+    }
+
+    view.ShowInfo("Updating Twitch stream title...");
+    var result = await twitch.UpdateChannelTitleAsync(title);
+    if (result.Success)
+      view.ShowSuccess($"  Twitch title set: {title}");
+    else
+    {
+      view.ShowError($"  Failed to update Twitch title ({result.StatusCode}).");
+      if (!string.IsNullOrWhiteSpace(result.Error))
+        view.ShowError($"  {result.Error}");
+    }
+  }
+
   private static async Task<bool> UpdateTwitch(
       StartCommandView view, SocliConfig config, Activity activity)
   {

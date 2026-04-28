@@ -181,11 +181,21 @@ public class TwitchService : IDisposable
 
   public async Task<UpdateChannelResult> UpdateChannelAsync(string title, string gameId, List<string> tags)
   {
+    var body = BuildChannelBody(title, gameId, tags);
+    return await PatchChannel(body);
+  }
+
+  public async Task<UpdateChannelResult> UpdateChannelTitleAsync(string title)
+  {
+    var body = new Dictionary<string, object> { ["title"] = title };
+    return await PatchChannel(body);
+  }
+
+  private async Task<UpdateChannelResult> PatchChannel(Dictionary<string, object> body)
+  {
     var broadcasterId = _config.Twitch.BroadcasterId;
     if (string.IsNullOrEmpty(broadcasterId))
       return new UpdateChannelResult(false, null, "Twitch broadcasterId not configured.");
-
-    var body = BuildChannelBody(title, gameId, tags);
 
     var response = await SendChannelPatch(broadcasterId, body);
 
