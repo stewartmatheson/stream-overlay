@@ -20,6 +20,8 @@ public static class StartCommand
     if (activity.UsePomodoro && !await CheckPomodoroStatus(controller, view, pomodoroExe))
       return 1;
 
+    var overlayTitle = view.PromptForOverlayTitle(activity.Title);
+
     view.ShowSessionSummary(config, activity);
 
     if (!view.ConfirmStart())
@@ -32,6 +34,8 @@ public static class StartCommand
       return 1;
 
     LaunchAllApplications(controller, view, config.Applications.Concat(activity.Applications));
+
+    await SendOverlayLabel(controller, view, overlayTitle);
 
     if (activity.Checklist.Count > 0)
       view.RunChecklist(activity.Checklist);
@@ -173,6 +177,21 @@ public static class StartCommand
 
       controller.LaunchApplication(app);
       view.ShowSuccess($"  Started: {app.Path}");
+    }
+  }
+
+  private static async Task SendOverlayLabel(
+      StartCommandController controller, StartCommandView view, string title)
+  {
+    view.ShowInfo("Sending stream title to overlay...");
+    try
+    {
+      await controller.SendOverlayLabelAsync(title);
+      view.ShowSuccess($"  Overlay label set: {title}");
+    }
+    catch (Exception ex)
+    {
+      view.ShowWarning($"  Could not send overlay label: {ex.Message}");
     }
   }
 

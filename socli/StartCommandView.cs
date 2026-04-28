@@ -31,6 +31,15 @@ public class StartCommandView
         return activity;
     }
 
+    public string PromptForOverlayTitle(string defaultTitle)
+    {
+        var title = AnsiConsole.Prompt(
+            new TextPrompt<string>("[blue]Stream overlay title[/] [grey](Enter to use default)[/]:")
+                .DefaultValue(defaultTitle)
+                .HideDefaultValue());
+        return title;
+    }
+
     public List<string> PromptForFirstTask()
     {
         var task = AnsiConsole.Prompt(
