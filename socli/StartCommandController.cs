@@ -108,7 +108,7 @@ public class StartCommandController
     var stream = client.GetStream();
     var labelColor = "e0af68";
     var commandText = $"[b][color={labelColor}]{text}[/color][/b]";
-    var bytes = Encoding.UTF8.GetBytes($"label set default|{commandText}|220,47\n");
+    var bytes = Encoding.UTF8.GetBytes($"label set default|{commandText}|1320|220,47\n");
     await stream.WriteAsync(bytes);
     await stream.FlushAsync();
   }
