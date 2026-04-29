@@ -95,12 +95,6 @@ See the [socli README](socli/README.md) for full configuration details.
 
 ## TODO
 
-- Extend the label overlay in v4 to function like a marquee tag from the
-  old web. It should now take a width which is a max width and move text
-  that is too long from side to side. Have a param in the code base
-  controlling speed that is hard coded. If width is not set then render
-  the text as a static label as it is now.
-
 - Rename v4 to something better
 
 - Wrap v4 in a service. Are we going too hard at Windows?
