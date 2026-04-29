@@ -248,6 +248,33 @@ void Renderer::draw_rich_text(const std::wstring& text, const std::vector<TextSp
                         D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT);
 }
 
+float Renderer::measure_rich_text_width(const std::wstring& text, const std::vector<TextSpan>& spans) {
+    ComPtr<IDWriteTextLayout> layout;
+    HRESULT hr = dwrite_->CreateTextLayout(text.c_str(), static_cast<UINT32>(text.size()),
+                                           body_fmt_.Get(), 100000.f, 100000.f, layout.GetAddressOf());
+    if (FAILED(hr)) return 0.f;
+
+    layout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
+
+    for (const auto& span : spans) {
+        DWRITE_TEXT_RANGE range{span.start, span.length};
+        switch (span.type) {
+        case TextSpan::Bold:
+            layout->SetFontWeight(DWRITE_FONT_WEIGHT_EXTRA_BOLD, range);
+            break;
+        case TextSpan::Italic:
+            layout->SetFontStyle(DWRITE_FONT_STYLE_ITALIC, range);
+            break;
+        default:
+            break;
+        }
+    }
+
+    DWRITE_TEXT_METRICS metrics;
+    layout->GetMetrics(&metrics);
+    return metrics.width;
+}
+
 void Renderer::draw_drop_shadow(D2D1_RECT_F rect, float corner_radius,
                                  D2D1_COLOR_F color, float blur_radius,
                                  float offset_x, float offset_y) {

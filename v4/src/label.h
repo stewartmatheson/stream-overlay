@@ -24,6 +24,11 @@ private:
         std::vector<TextSpan> spans;
         float x = 0.f;
         float y = 0.f;
+        float max_width = 0.f;
+        float scroll_offset = 0.f;
+        int scroll_direction = 1;
+        float text_width = -1.f;
+        float pause_timer = 0.f;
     };
 
     std::unordered_map<std::string, LabelEntry> labels_;

@@ -36,6 +36,8 @@ public:
                           float offset_x = 0.f, float offset_y = 0.f);
     void draw_border(D2D1_RECT_F rect, D2D1_COLOR_F color, float width = 2.f);
 
+    float measure_rich_text_width(const std::wstring& text, const std::vector<TextSpan>& spans);
+
     float screen_width() const;
     float screen_height() const;
 

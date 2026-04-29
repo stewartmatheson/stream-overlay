@@ -101,8 +101,8 @@ Hides the current timer immediately.
 Displays a list of items at the given pixel position. Items within the
 content are separated by literal `\n` (the two-character sequence). Each
 item supports BBCode formatting. Only one list can be displayed at a
-time — sending a new `set` command replaces the current list. The active
-task is always the first item.
+time --- sending a new `set` command replaces the current list. The
+active task is always the first item.
 
   Parameter   Type     Description
   ----------- -------- -------------------------------------------
@@ -139,9 +139,52 @@ Hides the list and removes all items.
 .\scripts\send-list.ps1 -Clear
 ```
 
-**Note:** The `.ps1` script must be saved with a UTF-8 BOM for emoji
-and non-ASCII characters in default parameter values to work correctly
-under Windows PowerShell 5.1.
+**Note:** The `.ps1` script must be saved with a UTF-8 BOM for emoji and
+non-ASCII characters in default parameter values to work correctly under
+Windows PowerShell 5.1.
+
+### Mode: Label
+
+#### `label set Id|Text|X,Y`
+
+Displays a static text label at the given pixel position. Multiple
+labels can be active simultaneously, each identified by a unique Id.
+Sending a new `set` for the same Id replaces it. Supports BBCode.
+
+  Parameter   Type     Description
+  ----------- -------- -------------------------------------------
+  `Id`        string   Unique identifier for this label
+  `Text`      string   Label text (supports BBCode)
+  `X,Y`       string   Screen position in pixels
+
+#### `label set Id|Text|Width|X,Y`
+
+When a `Width` is provided the label acts as a marquee --- text wider
+than `Width` pixels scrolls back and forth automatically. Text that fits
+within the width is displayed statically. Scroll speed is controlled by
+a hard-coded constant in the source (`kMarqueeSpeed`, default 50 px/s).
+
+  Parameter   Type     Description
+  ----------- -------- -------------------------------------------
+  `Id`        string   Unique identifier for this label
+  `Text`      string   Label text (supports BBCode)
+  `Width`     int      Max display width in pixels (enables marquee)
+  `X,Y`       string   Screen position in pixels
+
+Examples:
+
+``` text
+label set title|Now Playing: Some Song|100,50
+label set song|This is a very long song title that should scroll|200|100,80
+```
+
+#### `label clear`
+
+Removes all labels.
+
+#### `label clear Id`
+
+Removes a single label by Id.
 
 ### BBCode Formatting
 
@@ -220,3 +263,4 @@ wave for the alarm sound?
 
 Start the app so the window is always at the bottom of all other already
 open windows. Can we make it stay at the bottom?
+

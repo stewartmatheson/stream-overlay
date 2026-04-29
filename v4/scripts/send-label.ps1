@@ -1,6 +1,7 @@
 param(
     [string]$Id = "default",
     [string]$Text = "[b][color=73daca]Building all my stream overlay software from scratch till its done! 10 streams in a row so far...[/color][/b]",
+    [int]$Width = 0,
     [string]$Position = "220,47",
     [switch]$Clear,
     [int]$Port = 7777
@@ -12,6 +13,8 @@ if ($Clear) {
     } else {
         $msg = "label clear $Id"
     }
+} elseif ($Width -gt 0) {
+    $msg = "label set $Id|$Text|$Width|$Position"
 } else {
     $msg = "label set $Id|$Text|$Position"
 }
