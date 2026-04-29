@@ -11,6 +11,9 @@ public class SocliConfig
   [JsonPropertyName("applications")]
   public List<ApplicationConfig> Applications { get; set; } = [];
 
+  [JsonPropertyName("jukebox")]
+  public List<string> Jukebox { get; set; } = [];
+
   [JsonPropertyName("activities")]
   public List<Activity> Activities { get; set; } = [];
 
@@ -79,6 +82,9 @@ public class Activity
 
   [JsonPropertyName("checklist")]
   public List<string> Checklist { get; set; } = [];
+
+  [JsonPropertyName("jukebox")]
+  public bool Jukebox { get; set; }
 }
 
 public class ApplicationConfig

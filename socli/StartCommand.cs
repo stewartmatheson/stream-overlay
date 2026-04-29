@@ -35,6 +35,9 @@ public static class StartCommand
 
     LaunchAllApplications(controller, view, config.Applications.Concat(activity.Applications));
 
+    if (activity.Jukebox && config.Jukebox.Count > 0)
+      LaunchJukebox(controller, view, config.Jukebox);
+
     await SendOverlayLabel(controller, view, overlayTitle);
 
     if (activity.Checklist.Count > 0)
@@ -209,6 +212,15 @@ public static class StartCommand
       return false;
     }
     return true;
+  }
+
+  private static void LaunchJukebox(
+      StartCommandController controller, StartCommandView view,
+      List<string> playlists)
+  {
+    view.ShowInfo("Starting jukebox...");
+    controller.LaunchJukebox(playlists);
+    view.ShowSuccess("  Jukebox started!");
   }
 
   private static void LaunchAllApplications(

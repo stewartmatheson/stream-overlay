@@ -31,11 +31,28 @@ twitchSetupCommand.SetAction((_, _) =>
   return Task.CompletedTask;
 });
 
+var jukeboxCommand = new Command("jukebox", "Pick a random playlist from the jukebox and open it");
+jukeboxCommand.SetAction((_, _) =>
+{
+  var config = SocliConfig.Load();
+  if (config.Jukebox.Count == 0)
+  {
+    AnsiConsole.MarkupLine("[red]No playlists configured in jukebox.[/]");
+    Environment.ExitCode = 1;
+    return Task.CompletedTask;
+  }
+  var controller = new StartCommandController();
+  controller.LaunchJukebox(config.Jukebox);
+  AnsiConsole.MarkupLine("[green]Jukebox started![/]");
+  return Task.CompletedTask;
+});
+
 var rootCommand = new RootCommand("CLI tool for managing Twitch stream sessions");
 rootCommand.Add(startCommand);
 rootCommand.Add(updateTwitchCommand);
 rootCommand.Add(updateTitleCommand);
 rootCommand.Add(twitchSetupCommand);
+rootCommand.Add(jukeboxCommand);
 
 var parseResult = rootCommand.Parse(args);
 await parseResult.InvokeAsync();

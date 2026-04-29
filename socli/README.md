@@ -134,6 +134,18 @@ Configuration is stored in a JSON file `~/.socli.json`
   "applications": [
     "./path/to/exe/app.exe"
   ],
+  "jukebox": [
+    "music://music.apple.com/au/playlist/lofi-girl-beats-to-relax-study-to/pl.bf7a3cbca49644d8a33f09c1285aef5c",
+    "music://music.apple.com/au/playlist/peaceful-piano-music-to-focus-study-to/pl.1347c78be3a44a8f9791f9bc5bebcb98",
+    "music://music.apple.com/au/playlist/relaxing-jazz-music/pl.58cf4a62555c4a07a3afc618fe13ca04"
+    "music://music.apple.com/au/playlist/sleep-lofi-bedtime-relaxing-music/pl.032a68a5660346758a80057d1ae4b71f",
+    "music://music.apple.com/au/playlist/chill-guitar/pl.d9c56209d1e04a7b85ee880322ff0ec7"
+    "music://music.apple.com/au/playlist/synthwave-beats-to-chill-game-to/pl.6207ac6ce1cb4c2f843f6a7eac264940"
+    "music://music.apple.com/au/playlist/sleep-ambient/pl.3bcc3e01239c4bd189a068f729173aca",
+    "music://music.apple.com/au/playlist/relaxing-classical-music/pl.c1ca77f1a0b241b29ac797e6ba7f2274",
+    "music://music.apple.com/au/playlist/synth-ambient-chill-music-to-sleep-to/pl.9299cd226bc74f76b75b494c954225ba",
+    "music://music.apple.com/au/station/streambeats-by-harris-heller/ra.a-1571523555"
+  ],
   "activities": [
     {
       "name": "Programming",
@@ -153,7 +165,8 @@ Configuration is stored in a JSON file `~/.socli.json`
         "Is HDR off?",
         "Make sure obs is running",
         "Are the levels correct in obs"
-      ]
+      ],
+      "jukebox": true
     },
     {
       "name": "ESO Gaming",
@@ -168,7 +181,8 @@ Configuration is stored in a JSON file `~/.socli.json`
         "Is HDR on?",
         "Make sure obs is running",
         "Are the levels correct in obs"
-      ]
+      ],
+      "jukebox": true
     }
   ]
 }

@@ -43,6 +43,16 @@ public class StartCommandController
     Process.Start(psi);
   }
 
+  public void LaunchJukebox(List<string> playlists)
+  {
+    var playlist = playlists[Random.Shared.Next(playlists.Count)];
+    Process.Start(new ProcessStartInfo
+    {
+      FileName = playlist,
+      UseShellExecute = true
+    });
+  }
+
   public async Task ResetPomodoro(string pomodoroExe)
   {
     var psi = new ProcessStartInfo
